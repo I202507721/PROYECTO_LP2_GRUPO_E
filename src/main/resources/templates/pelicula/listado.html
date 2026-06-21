@@ -84,48 +84,61 @@
 </head>
 <body>
 
-<div class="container">
-    <div class="header-section">
-        <h2>CU01: Gestión de Películas en Cartelera</h2>
-        <div>
-            <a th:href="@{/cine/pelicula/nuevo}" class="btn btn-primary">+ Nueva Película</a>
-            <a th:href="@{/cine/venta/nuevo}" class="btn btn-success">Ir a Taquilla 🎟️</a>
-        </div>
-    </div>
+	<div class="container">
+	    <div class="header-section">
+	        <h2>CU01: Gestión de Películas en Cartelera</h2>
+	        <div>
+	            <a th:href="@{/cine/pelicula/nuevo}" class="btn btn-primary">+ Nueva Película</a>
+	            <a th:href="@{/cine/venta/nuevo}" class="btn btn-success">Ir a Taquilla 🎟️</a>
+	        </div>
+	    </div>
 
-    <table>
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Título</th>
-                <th>Género</th>
-                <th>Duración</th>
-                <th>Clasificación</th>
-                <th>Estado</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr th:if="${#lists.isEmpty(peliculas)}">
-                <td colspan="6" style="text-align: center; color: #6c757d;">
-                    No hay películas activas registradas en este momento.
-                </td>
-            </tr>
-            
-            <tr th:each="p : ${peliculas}">
-                <td th:text="${p.idPelicula}">1</td>
-                <td style="font-weight: 500;" th:text="${p.titulo}">Película de Prueba</td>
-                <td th:text="${p.genero}">Género</td>
-                <td th:text="${p.duracion} + ' min'">0 min</td>
-                <td>
-                    <span class="badge" th:text="${p.clasificacion}">PG-13</span>
-                </td>
-                <td>
-                    <span style="color: #198754; font-weight: bold;">Activo</span>
-                </td>
-            </tr>
-        </tbody>
-    </table>
-</div>
+	    <div style="margin-bottom: 20px; background: #f1f3f5; padding: 15px; border-radius: 6px;">
+	        <form th:action="@{/cine/peliculas}" method="get" style="display: flex; gap: 10px; align-items: center;">
+	            <label for="txtGenero" style="font-weight: bold; color: #495057;">Filtrar por Género:</label>
+	            <input type="text" name="txtGenero" id="txtGenero" 
+	                   th:value="${generoBuscado}" 
+	                   placeholder="Ej: Ciencia Ficción, Suspenso..." 
+	                   style="flex: 1; padding: 8px; border: 1px solid #ced4da; border-radius: 4px;">
+	            <button type="submit" class="btn btn-primary" style="padding: 8px 15px;">Buscar 🔍</button>
+	            <a th:href="@{/cine/peliculas}" class="btn" style="background-color: #6c757d; color: white; padding: 8px 15px;">Limpiar</a>
+	        </form>
+	    </div>
+
+	    <table>
+	        <thead>
+	            <tr>
+	                <th>ID</th>
+	                <th>Título</th>
+	                <th>Género</th>
+	                <th>Duración</th>
+	                <th>Clasificación</th>
+	                <th>Estado</th>
+	            </tr>
+	        </thead>
+	        <tbody>
+	            <tr th:if="${#lists.isEmpty(peliculas)}">
+	                <td colspan="6" style="text-align: center; color: #6c757d;">
+	                    No se encontraron películas para el género seleccionado.
+	                </td>
+	            </tr>
+	            
+	            <tr th:each="p : ${peliculas}">
+	                <td th:text="${p.idPelicula}">1</td>
+	                <td style="font-weight: 500;" th:text="${p.titulo}">Película de Prueba</td>
+	                <td th:text="${p.genero}">Género</td>
+	                <td th:text="${p.duracion} + ' min'">0 min</td>
+	                <td>
+	                    <span class="badge" th:text="${p.clasificacion}">PG-13</span>
+	                </td>
+	                <td>
+	                    <span th:if="${p.estado == 1}" style="color: #198754; font-weight: bold;">Activo</span>
+	                    <span th:if="${p.estado == 0}" style="color: #dc3545; font-weight: bold;">Retirada</span>
+	                </td>
+	            </tr>
+	        </tbody>
+	    </table>
+	</div>
 
 </body>
 </html>

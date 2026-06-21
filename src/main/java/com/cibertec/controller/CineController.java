@@ -25,10 +25,17 @@ public class CineController {
     // ==========================================
 
     @GetMapping("/peliculas")
-    public String listarPeliculas(Model model) {
-        log.info("CU01: Listando todas las películas activas.");
-        model.addAttribute("peliculas", peliculaRepository.findByEstado(1));
-        return "pelicula/listado"; // Archivo: templates/pelicula/listado.html
+    public String listarPeliculas(@RequestParam(name = "txtGenero", required = false) String genero, Model model) {
+        if (genero != null && !genero.trim().isEmpty()) {
+            log.info("CU01: Filtrando películas por género contenga: '{}'", genero);
+            // Ejecuta el procedimiento almacenado
+            model.addAttribute("peliculas", peliculaRepository.filtrarPorGenero(genero));
+            model.addAttribute("generoBuscado", genero); // Devolvemos el texto para mantenerlo en la caja de texto
+        } else {
+            log.info("CU01: Listando todas las películas activas por defecto.");
+            model.addAttribute("peliculas", peliculaRepository.findByEstado(1));
+        }
+        return "pelicula/listado";
     }
 
     @GetMapping("/pelicula/nuevo")
