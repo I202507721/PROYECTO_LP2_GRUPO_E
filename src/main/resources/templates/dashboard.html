@@ -3,39 +3,38 @@
 <head>
     <meta charset="UTF-8">
     <title>CineMax - Dashboard</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" />
+    <link rel="stylesheet" th:href="@{/css/cinemax.css}">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
-<body class="bg-light">
+<body>
 
-    <div class="container mt-5">
-        <div class="row mb-4">
-            <div class="col-12 d-flex justify-content-between align-items-center">
-                <h2>Panel Principal</h2>
-                <a th:href="@{/}" class="btn btn-outline-danger">Cerrar Sesión</a>
+    <div class="cm-container">
+        <div class="cm-topbar">
+            <div>
+                <div class="cm-brand">🎬 CINE<span class="accent">MAX</span></div>
             </div>
+            <a th:href="@{/}" class="cm-btn cm-btn-outline"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</a>
         </div>
-        
-        <div class="row">
-            <div class="col-md-6 mb-3">
-                <div class="card text-white bg-primary">
-                    <div class="card-body">
-                        <h5 class="card-title">Mantenimiento de Películas</h5>
-                        <p class="card-text">Agrega, edita y filtra el catálogo de películas.</p>
-                        <a th:href="@{/cine/peliculas}" class="btn btn-light">Ir a Cartelera</a>
-                    </div>
-                </div>
+
+        <h2 class="cm-mt-0" style="margin-bottom: 24px;">Panel Principal</h2>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 24px;">
+
+            <div class="cm-option-card">
+                <div class="cm-icon"><i class="fas fa-film"></i></div>
+                <h3 class="cm-mt-0" style="margin-bottom: 0;">Mantenimiento de Películas</h3>
+                <p>Agrega, edita y filtra el catálogo de películas en cartelera.</p>
+                <a th:href="@{/cine/peliculas}" class="cm-btn cm-btn-gold">Ir a Cartelera <i class="fas fa-arrow-right"></i></a>
             </div>
-            
-            <div class="col-md-6 mb-3">
-                <div class="card text-white bg-success">
-                    <div class="card-body">
-                        <h5 class="card-title">Punto de Venta (Taquilla)</h5>
-                        <p class="card-text">Registra ventas y asigna asientos a las funciones.</p>
-                        <a th:href="@{/cine/venta/nuevo}" class="btn btn-light">Abrir Taquilla</a>
-                    </div>
-                </div>
+
+            <div class="cm-option-card">
+                <div class="cm-icon"><i class="fas fa-ticket-alt"></i></div>
+                <h3 class="cm-mt-0" style="margin-bottom: 0;">Punto de Venta (Taquilla)</h3>
+                <p>Registra ventas y asigna asientos a las funciones disponibles.</p>
+                <a th:href="@{/cine/venta/nuevo}" class="cm-btn cm-btn-gold">Abrir Taquilla <i class="fas fa-arrow-right"></i></a>
             </div>
+
         </div>
     </div>
 

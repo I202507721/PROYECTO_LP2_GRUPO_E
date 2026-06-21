@@ -3,141 +3,71 @@
 <head>
     <meta charset="UTF-8">
     <title>CineMax - Listado de Películas</title>
-    <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 40px;
-            background-color: #f8f9fa;
-            color: #333;
-        }
-        .container {
-            max-width: 1000px;
-            margin: 0 auto;
-            background: #ffffff;
-            padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        }
-        .header-section {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 2px solid #dee2e6;
-            padding-bottom: 20px;
-            margin-bottom: 25px;
-        }
-        h2 {
-            margin: 0;
-            color: #212529;
-        }
-        .btn {
-            display: inline-block;
-            padding: 10px 20px;
-            border-radius: 5px;
-            text-decoration: none;
-            font-weight: bold;
-            font-size: 14px;
-            transition: background-color 0.2s;
-        }
-        .btn-primary {
-            background-color: #0d6efd;
-            color: #fff;
-        }
-        .btn-primary:hover {
-            background-color: #0b5ed7;
-        }
-        .btn-success {
-            background-color: #198754;
-            color: #fff;
-        }
-        .btn-success:hover {
-            background-color: #157347;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 20px;
-        }
-        th, td {
-            padding: 12px 15px;
-            text-align: left;
-            border-bottom: 1px solid #dee2e6;
-        }
-        th {
-            background-color: #f1f3f5;
-            color: #495057;
-            font-weight: 600;
-        }
-        tr:hover {
-            background-color: #f8f9fa;
-        }
-        .badge {
-            display: inline-block;
-            padding: 5px 10px;
-            font-size: 12px;
-            font-weight: bold;
-            border-radius: 50px;
-            background-color: #e9ecef;
-            color: #495057;
-        }
-    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" />
+    <link rel="stylesheet" th:href="@{/css/cinemax.css}">
 </head>
 <body>
 
-	<div class="container">
-	    <div class="header-section">
-	        <h2>CU01: Gestión de Películas en Cartelera</h2>
+	<div class="cm-container" style="max-width: 1100px;">
+
+	    <div class="cm-topbar">
 	        <div>
-	            <a th:href="@{/cine/pelicula/nuevo}" class="btn btn-primary">+ Nueva Película</a>
-	            <a th:href="@{/cine/venta/nuevo}" class="btn btn-success">Ir a Taquilla 🎟️</a>
+	            <div class="cm-brand" style="font-size: 1.4rem; margin-bottom: 4px;">🎬 CINE<span class="accent">MAX</span></div>
+	            <h2 class="cm-mt-0">Gestión de Películas en Cartelera</h2>
+	        </div>
+	        <div class="cm-flex-between cm-gap-sm" style="width: auto;">
+	            <a th:href="@{/cine/pelicula/nuevo}" class="cm-btn cm-btn-gold"><i class="fas fa-plus"></i> Nueva Película</a>
+	            <a th:href="@{/cine/venta/nuevo}" class="cm-btn cm-btn-outline"><i class="fas fa-ticket-alt"></i> Ir a Taquilla</a>
 	        </div>
 	    </div>
 
-	    <div style="margin-bottom: 20px; background: #f1f3f5; padding: 15px; border-radius: 6px;">
-	        <form th:action="@{/cine/peliculas}" method="get" style="display: flex; gap: 10px; align-items: center;">
-	            <label for="txtGenero" style="font-weight: bold; color: #495057;">Filtrar por Género:</label>
-	            <input type="text" name="txtGenero" id="txtGenero" 
-	                   th:value="${generoBuscado}" 
-	                   placeholder="Ej: Ciencia Ficción, Suspenso..." 
-	                   style="flex: 1; padding: 8px; border: 1px solid #ced4da; border-radius: 4px;">
-	            <button type="submit" class="btn btn-primary" style="padding: 8px 15px;">Buscar 🔍</button>
-	            <a th:href="@{/cine/peliculas}" class="btn" style="background-color: #6c757d; color: white; padding: 8px 15px;">Limpiar</a>
+	    <div class="cm-card" style="padding: 18px 20px; margin-bottom: 24px;">
+	        <form th:action="@{/cine/peliculas}" method="get" class="cm-flex-between cm-gap-sm">
+	            <label for="txtGenero" class="cm-label" style="margin: 0; white-space: nowrap;">Filtrar por Género</label>
+	            <input type="text" name="txtGenero" id="txtGenero"
+	                   th:value="${generoBuscado}"
+	                   placeholder="Ej: Ciencia Ficción, Suspenso..."
+	                   class="cm-input" style="flex: 1; min-width: 200px;">
+	            <button type="submit" class="cm-btn cm-btn-gold"><i class="fas fa-search"></i> Buscar</button>
+	            <a th:href="@{/cine/peliculas}" class="cm-btn cm-btn-ghost">Limpiar</a>
 	        </form>
 	    </div>
 
-	    <table>
-	        <thead>
-	            <tr>
-	                <th>ID</th>
-	                <th>Título</th>
-	                <th>Género</th>
-	                <th>Duración</th>
-	                <th>Clasificación</th>
-	                <th>Estado</th>
-	            </tr>
-	        </thead>
-	        <tbody>
-	            <tr th:if="${#lists.isEmpty(peliculas)}">
-	                <td colspan="6" style="text-align: center; color: #6c757d;">
-	                    No se encontraron películas para el género seleccionado.
-	                </td>
-	            </tr>
-	            
-	            <tr th:each="p : ${peliculas}">
-	                <td th:text="${p.idPelicula}">1</td>
-	                <td style="font-weight: 500;" th:text="${p.titulo}">Película de Prueba</td>
-	                <td th:text="${p.genero}">Género</td>
-	                <td th:text="${p.duracion} + ' min'">0 min</td>
-	                <td>
-	                    <span class="badge" th:text="${p.clasificacion}">PG-13</span>
-	                </td>
-	                <td>
-	                    <span th:if="${p.estado == 1}" style="color: #198754; font-weight: bold;">Activo</span>
-	                    <span th:if="${p.estado == 0}" style="color: #dc3545; font-weight: bold;">Retirada</span>
-	                </td>
-	            </tr>
-	        </tbody>
-	    </table>
+	    <div class="cm-table-wrap">
+	        <table class="cm-table">
+	            <thead>
+	                <tr>
+	                    <th>ID</th>
+	                    <th>Título</th>
+	                    <th>Género</th>
+	                    <th>Duración</th>
+	                    <th>Clasificación</th>
+	                    <th>Estado</th>
+	                </tr>
+	            </thead>
+	            <tbody>
+	                <tr th:if="${#lists.isEmpty(peliculas)}">
+	                    <td colspan="6" style="text-align: center; color: var(--cm-cream-dim); padding: 30px;">
+	                        No se encontraron películas para el género seleccionado.
+	                    </td>
+	                </tr>
+
+	                <tr th:each="p : ${peliculas}">
+	                    <td th:text="${p.idPelicula}">1</td>
+	                    <td style="font-weight: 600; color: var(--cm-cream);" th:text="${p.titulo}">Película de Prueba</td>
+	                    <td th:text="${p.genero}">Género</td>
+	                    <td th:text="${p.duracion} + ' min'">0 min</td>
+	                    <td>
+	                        <span class="cm-badge cm-badge-gold" th:text="${p.clasificacion}">PG-13</span>
+	                    </td>
+	                    <td>
+	                        <span th:if="${p.estado == 1}" class="cm-status-active"><i class="fas fa-circle" style="font-size: 8px;"></i> Activo</span>
+	                        <span th:if="${p.estado == 0}" class="cm-status-inactive"><i class="fas fa-circle" style="font-size: 8px;"></i> Retirada</span>
+	                    </td>
+	                </tr>
+	            </tbody>
+	        </table>
+	    </div>
 	</div>
 
 </body>

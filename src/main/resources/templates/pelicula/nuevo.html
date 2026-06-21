@@ -3,59 +3,56 @@
 <head>
     <meta charset="UTF-8">
     <title>CineMax - Nueva Película</title>
-    <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f8f9fa; padding: 40px; }
-        .container { max-width: 600px; margin: auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-        .form-group { margin-bottom: 15px; }
-        label { font-weight: bold; display: block; margin-bottom: 5px; color: #495057; }
-        input, select { width: 100%; padding: 10px; border: 1px solid #ced4da; border-radius: 4px; box-sizing: border-box; }
-        .btn-container { display: flex; justify-content: space-between; margin-top: 20px; }
-        .btn { padding: 10px 20px; text-decoration: none; border-radius: 5px; color: white; border: none; cursor: pointer; font-weight: bold; }
-        .btn-primary { background-color: #0d6efd; }
-        .btn-secondary { background-color: #6c757d; }
-        .alert { color: #dc3545; background-color: #f8d7da; padding: 10px; border-radius: 4px; margin-bottom: 15px; }
-    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" />
+    <link rel="stylesheet" th:href="@{/css/cinemax.css}">
 </head>
 <body>
 
-<div class="container">
-    <h2 style="margin-top: 0; border-bottom: 2px solid #dee2e6; padding-bottom: 10px;">Registrar Nueva Película</h2>
-    
-    <div th:if="${error}" class="alert" th:text="${error}"></div>
+<div class="cm-container" style="max-width: 620px;">
 
-    <form th:action="@{/cine/pelicula/guardar}" th:object="${pelicula}" method="post">
-        
-        <div class="form-group">
-            <label for="titulo">Título de la Película:</label>
-            <input type="text" id="titulo" th:field="*{titulo}" required placeholder="Ej: Avengers: Endgame">
-        </div>
+    <div class="cm-brand" style="font-size: 1.3rem; margin-bottom: 18px;">🎬 CINE<span class="accent">MAX</span></div>
 
-        <div class="form-group">
-            <label for="genero">Género:</label>
-            <input type="text" id="genero" th:field="*{genero}" required placeholder="Ej: Acción">
-        </div>
+    <div class="cm-card">
+        <h2 class="cm-mt-0" style="border-bottom: 1px solid var(--cm-line); padding-bottom: 16px; margin-bottom: 24px;">
+            <i class="fas fa-film" style="font-size: 0.8em;"></i> Registrar Nueva Película
+        </h2>
 
-        <div class="form-group">
-            <label for="duracion">Duración (minutos):</label>
-            <input type="number" id="duracion" th:field="*{duracion}" required min="1">
-        </div>
+        <div th:if="${error}" class="cm-alert cm-alert-error" th:text="${error}"></div>
 
-        <div class="form-group">
-            <label for="clasificacion">Clasificación:</label>
-            <select id="clasificacion" th:field="*{clasificacion}" required>
-                <option value="">-- Seleccione --</option>
-                <option value="ATP">Apta para Todos (ATP)</option>
-                <option value="PG-13">Mayores de 13 (PG-13)</option>
-                <option value="Mayores 14">Mayores de 14</option>
-                <option value="Mayores 18">Mayores de 18</option>
-            </select>
-        </div>
+        <form th:action="@{/cine/pelicula/guardar}" th:object="${pelicula}" method="post">
 
-        <div class="btn-container">
-            <a th:href="@{/cine/peliculas}" class="btn btn-secondary">Cancelar</a>
-            <button type="submit" class="btn btn-primary">Guardar Película</button>
-        </div>
-    </form>
+            <div class="cm-field">
+                <label class="cm-label" for="titulo">Título de la Película</label>
+                <input type="text" id="titulo" class="cm-input" th:field="*{titulo}" required placeholder="Ej: Avengers: Endgame">
+            </div>
+
+            <div class="cm-field">
+                <label class="cm-label" for="genero">Género</label>
+                <input type="text" id="genero" class="cm-input" th:field="*{genero}" required placeholder="Ej: Acción">
+            </div>
+
+            <div class="cm-field">
+                <label class="cm-label" for="duracion">Duración (minutos)</label>
+                <input type="number" id="duracion" class="cm-input" th:field="*{duracion}" required min="1">
+            </div>
+
+            <div class="cm-field">
+                <label class="cm-label" for="clasificacion">Clasificación</label>
+                <select id="clasificacion" class="cm-select" th:field="*{clasificacion}" required>
+                    <option value="">-- Seleccione --</option>
+                    <option value="ATP">Apta para Todos (ATP)</option>
+                    <option value="PG-13">Mayores de 13 (PG-13)</option>
+                    <option value="Mayores 14">Mayores de 14</option>
+                    <option value="Mayores 18">Mayores de 18</option>
+                </select>
+            </div>
+
+            <div class="cm-flex-between" style="margin-top: 28px;">
+                <a th:href="@{/cine/peliculas}" class="cm-btn cm-btn-ghost">Cancelar</a>
+                <button type="submit" class="cm-btn cm-btn-gold"><i class="fas fa-save"></i> Guardar Película</button>
+            </div>
+        </form>
+    </div>
 </div>
 
 </body>

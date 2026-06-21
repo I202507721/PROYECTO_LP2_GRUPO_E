@@ -3,60 +3,55 @@
 <head>
     <meta charset="UTF-8">
     <title>CineMax - Taquilla (Ventas)</title>
-    <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f8f9fa; padding: 40px; }
-        .container { max-width: 800px; margin: auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-        .form-group { margin-bottom: 20px; }
-        label { font-weight: bold; display: block; margin-bottom: 8px; color: #495057; }
-        select, input { width: 100%; padding: 10px; border: 1px solid #ced4da; border-radius: 4px; box-sizing: border-box; }
-        .btn-container { display: flex; justify-content: space-between; margin-top: 30px; }
-        .btn { padding: 12px 25px; text-decoration: none; border-radius: 5px; color: white; border: none; cursor: pointer; font-weight: bold; font-size: 16px; }
-        .btn-primary { background-color: #198754; }
-        .btn-secondary { background-color: #6c757d; }
-        .alert-success { color: #0f5132; background-color: #d1e7dd; padding: 15px; border-radius: 4px; margin-bottom: 20px; }
-        .alert-danger { color: #842029; background-color: #f8d7da; padding: 15px; border-radius: 4px; margin-bottom: 20px; }
-        
-        
-        .funcion-info { background: #e9ecef; padding: 15px; border-radius: 6px; margin-top: 10px; font-size: 14px; }
-    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" />
+    <link rel="stylesheet" th:href="@{/css/cinemax.css}">
 </head>
 <body>
 
-<div class="container">
-    <h2 style="margin-top: 0; border-bottom: 2px solid #dee2e6; padding-bottom: 10px;">🎟️ Taquilla - Registro de Venta</h2>
-    
-    <div th:if="${mensajeExito}" class="alert-success" th:text="${mensajeExito}"></div>
-    <div th:if="${mensajeError}" class="alert-danger" th:text="${mensajeError}"></div>
+<div class="cm-container" style="max-width: 820px;">
 
-    <form th:action="@{/cine/venta/guardar}" method="post">
-        
-        <div class="form-group">
-            <label for="idFuncion">Seleccione la Función (Cartelera Vigente):</label>
-            <select name="idFuncion" id="idFuncion" required>
-                <option value="">-- Seleccione una función --</option>
-                <option th:each="f : ${funciones}" 
-                        th:value="${f.idFuncion}" 
-                        th:text="|Función ${f.idFuncion} - Fecha: ${f.fecha} a las ${f.horaInicio} - Precio: S/. ${f.precioEntrada} (Disponibles: ${f.asientosDisponibles})|">
-                </option>
-            </select>
-        </div>
+    <div class="cm-brand" style="font-size: 1.3rem; margin-bottom: 18px;">🎬 CINE<span class="accent">MAX</span></div>
 
-        <div class="form-group">
-            <label for="cantidad">Cantidad de Entradas:</label>
-            <input type="number" name="cantidad" id="cantidad" required min="1" max="10" placeholder="Ej: 2">
-        </div>
+    <div class="cm-ticket">
+        <h2 class="cm-mt-0" style="border-bottom: 1px solid var(--cm-line); padding-bottom: 16px; margin-bottom: 24px;">
+            <i class="fas fa-ticket-alt" style="font-size: 0.8em;"></i> Taquilla — Registro de Venta
+        </h2>
 
-        <div class="form-group">
-            <label for="asientos">Códigos de Asientos (Separados por coma):</label>
-            <input type="text" name="asientos" id="asientos" required placeholder="Ej: A1,A2,B5">
-            <small style="color: #6c757d; display: block; margin-top: 5px;">*Asegúrese de ingresar tantos códigos como entradas solicitadas.</small>
-        </div>
+        <div th:if="${mensajeExito}" class="cm-alert cm-alert-success" th:text="${mensajeExito}"></div>
+        <div th:if="${mensajeError}" class="cm-alert cm-alert-error" th:text="${mensajeError}"></div>
 
-        <div class="btn-container">
-            <a th:href="@{/cine/peliculas}" class="btn btn-secondary">Volver a Cartelera</a>
-            <button type="submit" class="btn btn-primary">Procesar Venta</button>
-        </div>
-    </form>
+        <form th:action="@{/cine/venta/guardar}" method="post">
+
+            <div class="cm-field">
+                <label class="cm-label" for="idFuncion">Seleccione la Función (Cartelera Vigente)</label>
+                <select name="idFuncion" id="idFuncion" class="cm-select" required>
+                    <option value="">-- Seleccione una función --</option>
+                    <option th:each="f : ${funciones}"
+                            th:value="${f.idFuncion}"
+                            th:text="|Función ${f.idFuncion} - Fecha: ${f.fecha} a las ${f.horaInicio} - Precio: S/. ${f.precioEntrada} (Disponibles: ${f.asientosDisponibles})|">
+                    </option>
+                </select>
+            </div>
+
+            <div class="cm-field">
+                <label class="cm-label" for="cantidad">Cantidad de Entradas</label>
+                <input type="number" name="cantidad" id="cantidad" class="cm-input" required min="1" max="10" placeholder="Ej: 2">
+            </div>
+
+            <div class="cm-field">
+                <label class="cm-label" for="asientos">Códigos de Asientos (separados por coma)</label>
+                <input type="text" name="asientos" id="asientos" class="cm-input" required placeholder="Ej: A1,A2,B5">
+                <div class="cm-info-panel">
+                    <i class="fas fa-info-circle"></i> Asegúrese de ingresar tantos códigos de asiento como entradas solicitadas.
+                </div>
+            </div>
+
+            <div class="cm-flex-between" style="margin-top: 30px;">
+                <a th:href="@{/cine/peliculas}" class="cm-btn cm-btn-ghost">Volver a Cartelera</a>
+                <button type="submit" class="cm-btn cm-btn-gold cm-btn-lg"><i class="fas fa-check"></i> Procesar Venta</button>
+            </div>
+        </form>
+    </div>
 </div>
 
 </body>

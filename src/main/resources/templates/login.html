@@ -4,70 +4,86 @@
 <head>
     <meta charset="UTF-8">
     <title>CineMax - Iniciar Sesión</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" />
+    <link rel="stylesheet" th:href="@{/css/cinemax.css}">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
         body {
-            background-color: #212529; /* Fondo oscuro de cine */
-            min-height: 100vh;
             display: flex;
             align-items: center;
+            justify-content: center;
+            padding: 24px;
         }
-        .box-login {
-            background-color: rgba(255, 255, 255, 0.95);
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.8);
+        .login-shell {
+            width: 100%;
+            max-width: 420px;
+        }
+        .login-marquee {
+            text-align: center;
+            margin-bottom: 28px;
+        }
+        .login-marquee .cm-brand {
+            font-size: 2.6rem;
+            line-height: 1;
+        }
+        .login-marquee .tagline {
+            color: var(--cm-cream-dim);
+            font-size: 0.85rem;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            margin-top: 6px;
+        }
+        .login-header {
+            text-align: center;
+            font-family: var(--cm-display);
+            font-size: 1.3rem;
+            letter-spacing: 0.05em;
+            color: var(--cm-cream);
+            text-transform: uppercase;
+            margin-bottom: 24px;
+            padding-bottom: 18px;
+            border-bottom: 1px solid var(--cm-line);
         }
     </style>
 </head>
 
 <body>
-    <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-md-6 col-lg-5 box-login">
+    <div class="login-shell">
 
-                <div class="card shadow-lg border-0">
-                    <div class="card-header text-center bg-danger text-white">
-                        <h3>🎬 Sistema CineMax</h3>
-                    </div>
+        <div class="login-marquee">
+            <div class="cm-brand">🎬 CINE<span class="accent">MAX</span></div>
+            <div class="tagline">Sistema de Boletería</div>
+        </div>
 
-                    <div class="card-body">
-                        <h5 class="text-center mb-4">Acceso al Sistema</h5>
+        <div class="cm-ticket">
+            <div class="login-header">Acceso al Sistema</div>
 
-                        <form th:action="@{/login/iniciar-sesion}" method="get" th:object="${filter}">
-                            <div class="mb-3">
-                                <label class="form-label fw-bold">Usuario</label>
-                                <div class="input-group">
-                                    <span class="input-group-text"><i class="fa-solid fa-user"></i></span>
-                                    <input type="text" class="form-control" placeholder="Ingrese su usuario" th:field="*{username}" required>
-                                </div>
-                            </div>
-
-                            <div class="mb-3">
-                                <label class="form-label fw-bold">Contraseña</label>
-                                <div class="input-group">
-                                    <span class="input-group-text"><i class="fa-solid fa-key"></i></span>
-                                    <input type="password" class="form-control" placeholder="Ingrese su contraseña" th:field="*{password}" required>
-                                </div>
-                            </div>
-
-                            <div class="d-grid mt-4">
-                                <button type="submit" class="btn btn-danger btn-lg">
-                                    <i class="fas fa-sign-in-alt"></i> INGRESAR
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-
-                    <div class="card-footer text-muted text-center mt-2">
-                        &copy; 2026 CineMax - Todos los derechos reservados
+            <form th:action="@{/login/iniciar-sesion}" method="get" th:object="${filter}">
+                <div class="cm-field">
+                    <label class="cm-label" for="username">Usuario</label>
+                    <div class="cm-input-group">
+                        <span class="cm-input-group-icon"><i class="fa-solid fa-user"></i></span>
+                        <input type="text" id="username" class="cm-input" placeholder="Ingrese su usuario" th:field="*{username}" required>
                     </div>
                 </div>
-            </div>
+
+                <div class="cm-field">
+                    <label class="cm-label" for="password">Contraseña</label>
+                    <div class="cm-input-group">
+                        <span class="cm-input-group-icon"><i class="fa-solid fa-key"></i></span>
+                        <input type="password" id="password" class="cm-input" placeholder="Ingrese su contraseña" th:field="*{password}" required>
+                    </div>
+                </div>
+
+                <button type="submit" class="cm-btn cm-btn-gold cm-btn-lg cm-btn-block" style="margin-top: 10px;">
+                    <i class="fas fa-sign-in-alt"></i> INGRESAR
+                </button>
+            </form>
         </div>
+
+        <div class="cm-footer-note">&copy; 2026 CineMax — Todos los derechos reservados</div>
     </div>
+
     <th:block th:utext="${alert}"></th:block>
 </body>
 
