@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>CineMax - Taquilla (Ventas)</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f8f9fa; padding: 40px; }
+        .container { max-width: 800px; margin: auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .form-group { margin-bottom: 20px; }
+        label { font-weight: bold; display: block; margin-bottom: 8px; color: #495057; }
+        select, input { width: 100%; padding: 10px; border: 1px solid #ced4da; border-radius: 4px; box-sizing: border-box; }
+        .btn-container { display: flex; justify-content: space-between; margin-top: 30px; }
+        .btn { padding: 12px 25px; text-decoration: none; border-radius: 5px; color: white; border: none; cursor: pointer; font-weight: bold; font-size: 16px; }
+        .btn-primary { background-color: #198754; }
+        .btn-secondary { background-color: #6c757d; }
+        .alert-success { color: #0f5132; background-color: #d1e7dd; padding: 15px; border-radius: 4px; margin-bottom: 20px; }
+        .alert-danger { color: #842029; background-color: #f8d7da; padding: 15px; border-radius: 4px; margin-bottom: 20px; }
+        
+        
+        .funcion-info { background: #e9ecef; padding: 15px; border-radius: 6px; margin-top: 10px; font-size: 14px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2 style="margin-top: 0; border-bottom: 2px solid #dee2e6; padding-bottom: 10px;">🎟️ Taquilla - Registro de Venta</h2>
+    
+    <div th:if="${mensajeExito}" class="alert-success" th:text="${mensajeExito}"></div>
+    <div th:if="${mensajeError}" class="alert-danger" th:text="${mensajeError}"></div>
+
+    <form th:action="@{/cine/venta/guardar}" method="post">
+        
+        <div class="form-group">
+            <label for="idFuncion">Seleccione la Función (Cartelera Vigente):</label>
+            <select name="idFuncion" id="idFuncion" required>
+                <option value="">-- Seleccione una función --</option>
+                <option th:each="f : ${funciones}" 
+                        th:value="${f.idFuncion}" 
+                        th:text="|Función ${f.idFuncion} - Fecha: ${f.fecha} a las ${f.horaInicio} - Precio: S/. ${f.precioEntrada} (Disponibles: ${f.asientosDisponibles})|">
+                </option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="cantidad">Cantidad de Entradas:</label>
+            <input type="number" name="cantidad" id="cantidad" required min="1" max="10" placeholder="Ej: 2">
+        </div>
+
+        <div class="form-group">
+            <label for="asientos">Códigos de Asientos (Separados por coma):</label>
+            <input type="text" name="asientos" id="asientos" required placeholder="Ej: A1,A2,B5">
+            <small style="color: #6c757d; display: block; margin-top: 5px;">*Asegúrese de ingresar tantos códigos como entradas solicitadas.</small>
+        </div>
+
+        <div class="btn-container">
+            <a th:href="@{/cine/peliculas}" class="btn btn-secondary">Volver a Cartelera</a>
+            <button type="submit" class="btn btn-primary">Procesar Venta</button>
+        </div>
+    </form>
+</div>
+
+</body>
+</html>
