@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>CineMax - Listado de Películas</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 40px;
+            background-color: #f8f9fa;
+            color: #333;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: #ffffff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        .header-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #dee2e6;
+            padding-bottom: 20px;
+            margin-bottom: 25px;
+        }
+        h2 {
+            margin: 0;
+            color: #212529;
+        }
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 14px;
+            transition: background-color 0.2s;
+        }
+        .btn-primary {
+            background-color: #0d6efd;
+            color: #fff;
+        }
+        .btn-primary:hover {
+            background-color: #0b5ed7;
+        }
+        .btn-success {
+            background-color: #198754;
+            color: #fff;
+        }
+        .btn-success:hover {
+            background-color: #157347;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #dee2e6;
+        }
+        th {
+            background-color: #f1f3f5;
+            color: #495057;
+            font-weight: 600;
+        }
+        tr:hover {
+            background-color: #f8f9fa;
+        }
+        .badge {
+            display: inline-block;
+            padding: 5px 10px;
+            font-size: 12px;
+            font-weight: bold;
+            border-radius: 50px;
+            background-color: #e9ecef;
+            color: #495057;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header-section">
+        <h2>CU01: Gestión de Películas en Cartelera</h2>
+        <div>
+            <a th:href="@{/cine/pelicula/nuevo}" class="btn btn-primary">+ Nueva Película</a>
+            <a th:href="@{/cine/venta/nuevo}" class="btn btn-success">Ir a Taquilla 🎟️</a>
+        </div>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Título</th>
+                <th>Género</th>
+                <th>Duración</th>
+                <th>Clasificación</th>
+                <th>Estado</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr th:if="${#lists.isEmpty(peliculas)}">
+                <td colspan="6" style="text-align: center; color: #6c757d;">
+                    No hay películas activas registradas en este momento.
+                </td>
+            </tr>
+            
+            <tr th:each="p : ${peliculas}">
+                <td th:text="${p.idPelicula}">1</td>
+                <td style="font-weight: 500;" th:text="${p.titulo}">Película de Prueba</td>
+                <td th:text="${p.genero}">Género</td>
+                <td th:text="${p.duracion} + ' min'">0 min</td>
+                <td>
+                    <span class="badge" th:text="${p.clasificacion}">PG-13</span>
+                </td>
+                <td>
+                    <span style="color: #198754; font-weight: bold;">Activo</span>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+</body>
+</html>
