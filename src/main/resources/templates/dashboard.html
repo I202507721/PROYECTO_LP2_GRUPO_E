@@ -25,7 +25,7 @@
                 <div class="cm-icon"><i class="fas fa-film"></i></div>
                 <h3 class="cm-mt-0" style="margin-bottom: 0;">Mantenimiento de Películas</h3>
                 <p>Agrega, edita y filtra el catálogo de películas en cartelera.</p>
-                <a th:href="@{/cine/peliculas}" class="cm-btn cm-btn-gold">Ir a Cartelera <i class="fas fa-arrow-right"></i></a>
+                <a th:href="@{/cine/peliculas}" class="cm-btn cm-btn-gold">Gestionar Películas <i class="fas fa-arrow-right"></i></a>
             </div>
 
             <div class="cm-option-card">
@@ -33,6 +33,13 @@
                 <h3 class="cm-mt-0" style="margin-bottom: 0;">Punto de Venta (Taquilla)</h3>
                 <p>Registra ventas y asigna asientos a las funciones disponibles.</p>
                 <a th:href="@{/cine/venta/nuevo}" class="cm-btn cm-btn-gold">Abrir Taquilla <i class="fas fa-arrow-right"></i></a>
+            </div>
+
+            <div class="cm-option-card">
+                <div class="cm-icon"><i class="fas fa-chart-bar"></i></div>
+                <h3 class="cm-mt-0" style="margin-bottom: 0;">Reporte de Ocupación</h3>
+                <p>Visualiza el porcentaje de ocupación de cada sala en el día.</p>
+                <a th:href="@{/cine/reporte/ocupacion}" class="cm-btn cm-btn-gold">Ver Reporte <i class="fas fa-arrow-right"></i></a>
             </div>
 
         </div>

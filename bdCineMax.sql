@@ -290,6 +290,25 @@ END $$
 DELIMITER ;
 
 
+DELIMITER $$
+
+CREATE PROCEDURE sp_filtrar_pelicula_por_genero(
+    IN p_genero VARCHAR(50)
+)
+BEGIN
+    SELECT 
+        id_pelicula,
+        titulo,
+        genero,
+        duracion,
+        clasificacion,
+        estado -- Devolvemos el campo original numérico para que Hibernate no falle al mapear
+    FROM pelicula
+    WHERE genero LIKE CONCAT('%', p_genero, '%') 
+    ORDER BY titulo ASC;
+END $$
+
+DELIMITER ;
 -- -----------------------------insert-------------------------------------------
 
 USE bd_cine;
