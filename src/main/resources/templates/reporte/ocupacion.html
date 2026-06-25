@@ -1,66 +1,47 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <title>CineMax - Reporte de Ocupación de Salas</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" />
-    <link rel="stylesheet" th:href="@{/css/cinemax.css}">
-</head>
-<body>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="layout :: layoutBase(~{::contenido})">
 
-	<div class="cm-container" style="max-width: 1100px;">
+<div th:fragment="contenido">
+    <h2 class="cm-mt-0" style="margin-bottom: 20px;">Reporte de Ocupación de Salas (Hoy)</h2>
 
-	    <div class="cm-topbar">
-	        <div>
-	            <div class="cm-brand" style="font-size: 1.4rem; margin-bottom: 4px;">🎬 CINE<span class="accent">MAX</span></div>
-	            <h2 class="cm-mt-0">Reporte de Ocupación de Salas (Hoy)</h2>
-	        </div>
-	        <div class="cm-flex-between cm-gap-sm" style="width: auto;">
-	            <a th:href="@{/cine/peliculas}" class="cm-btn cm-btn-outline"><i class="fas fa-film"></i> Películas</a>
-	            <a th:href="@{/cine/venta/nuevo}" class="cm-btn cm-btn-outline"><i class="fas fa-ticket-alt"></i> Ir a Taquilla</a>
-	        </div>
-	    </div>
+    <div class="cm-table-wrap">
+        <table class="cm-table">
+            <thead>
+                <tr>
+                    <th>ID Función</th>
+                    <th>Película</th>
+                    <th>Sala</th>
+                    <th>Capacidad</th>
+                    <th>Vendidos</th>
+                    <th>Disponibles</th>
+                    <th>% Ocupación</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:if="${#lists.isEmpty(ocupaciones)}">
+                    <td colspan="7" style="text-align: center; color: var(--cm-cream-dim); padding: 30px;">
+                        No hay funciones programadas para el día de hoy.
+                    </td>
+                </tr>
+                <tr th:each="o : ${ocupaciones}">
+                    <td th:text="${o.idFuncion}">1</td>
+                    <td style="font-weight: 600; color: var(--cm-cream);" th:text="${o.pelicula}">Película</td>
+                    <td th:text="'Sala ' + ${o.numeroSala}">Sala 1</td>
+                    <td th:text="${o.capacidadTotal}">100</td>
+                    <td th:text="${o.asientosVendidos}">0</td>
+                    <td th:text="${o.asientosDisponibles}">100</td>
+                    <td style="min-width: 160px;">
+                        <div style="display:flex; align-items:center; gap:8px;">
+                            <div style="flex:1; background: rgba(255,255,255,0.08); border-radius: 6px; height: 10px; overflow:hidden;">
+                                <div th:style="'width:' + ${o.porcentajeOcupacion} + '%; height:100%; background: var(--cm-gold, #d4af37);'"></div>
+                            </div>
+                            <span class="cm-badge cm-badge-gold" th:text="${o.porcentajeOcupacion} + '%'">0%</span>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
 
-	    <div class="cm-table-wrap">
-	        <table class="cm-table">
-	            <thead>
-	                <tr>
-	                    <th>ID Función</th>
-	                    <th>Película</th>
-	                    <th>Sala</th>
-	                    <th>Capacidad</th>
-	                    <th>Vendidos</th>
-	                    <th>Disponibles</th>
-	                    <th>% Ocupación</th>
-	                </tr>
-	            </thead>
-	            <tbody>
-	                <tr th:if="${#lists.isEmpty(ocupaciones)}">
-	                    <td colspan="7" style="text-align: center; color: var(--cm-cream-dim); padding: 30px;">
-	                        No hay funciones programadas para el día de hoy.
-	                    </td>
-	                </tr>
-
-	                <tr th:each="o : ${ocupaciones}">
-	                    <td th:text="${o.idFuncion}">1</td>
-	                    <td style="font-weight: 600; color: var(--cm-cream);" th:text="${o.pelicula}">Película</td>
-	                    <td th:text="'Sala ' + ${o.numeroSala}">Sala 1</td>
-	                    <td th:text="${o.capacidadTotal}">100</td>
-	                    <td th:text="${o.asientosVendidos}">0</td>
-	                    <td th:text="${o.asientosDisponibles}">100</td>
-	                    <td style="min-width: 160px;">
-	                        <div style="display:flex; align-items:center; gap:8px;">
-	                            <div style="flex:1; background: rgba(255,255,255,0.08); border-radius: 6px; height: 10px; overflow:hidden;">
-	                                <div th:style="'width:' + ${o.porcentajeOcupacion} + '%; height:100%; background: var(--cm-gold, #d4af37);'"></div>
-	                            </div>
-	                            <span class="cm-badge cm-badge-gold" th:text="${o.porcentajeOcupacion} + '%'">0%</span>
-	                        </div>
-	                    </td>
-	                </tr>
-	            </tbody>
-	        </table>
-	    </div>
-	</div>
-
-</body>
 </html>

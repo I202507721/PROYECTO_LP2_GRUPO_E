@@ -26,6 +26,14 @@ public class Usuario {
     @Column(nullable = false, length = 50)
     private String nombre;
 
-    @Column(nullable = false, length = 20)
-    private String rol;
+    @Column(columnDefinition = "BIT(1) DEFAULT b'1'")
+    private Boolean activo;
+    
+    @ManyToOne
+    @JoinColumn(name = "id_tipo")
+    private TipoUsuario tipoUsuario;
+
+    public String getRol() {
+        return tipoUsuario != null ? tipoUsuario.getDescripcion() : "Sin Rol";
+    }
 }

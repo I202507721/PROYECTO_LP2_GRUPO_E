@@ -20,11 +20,13 @@ public class Funcion {
     @Column(name = "id_funcion")
     private Integer idFuncion;
 
-    @Column(name = "id_pelicula")
-    private Integer idPelicula;
+    @ManyToOne
+    @JoinColumn(name = "id_pelicula")
+    private Pelicula pelicula;
 
-    @Column(name = "id_sala")
-    private Integer idSala;
+    @ManyToOne
+    @JoinColumn(name = "id_sala")
+    private Sala sala;
 
     @Column(nullable = false)
     private LocalDate fecha;

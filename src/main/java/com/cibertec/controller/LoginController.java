@@ -43,5 +43,12 @@ public class LoginController {
         String alert = Alert.sweetImageUrl("Bienvenido a CineMax", mensajeBienvenida, "/imagenes/mapache_pedro.gif");
         flash.addFlashAttribute("alert", alert);
         return "redirect:/dashboard";
+        
+    }
+    
+    @GetMapping("/cerrar-sesion")
+    public String cerrarSesion(HttpSession session) {
+        session.invalidate();
+        return "redirect:/";
     }
 }

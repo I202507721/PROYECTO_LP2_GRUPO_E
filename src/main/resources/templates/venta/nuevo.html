@@ -8,10 +8,21 @@
 </head>
 <body>
 
-<div class="cm-container" style="max-width: 820px;">
+<div class="cm-container" style="max-width: 1100px;">
 
-    <div class="cm-brand" style="font-size: 1.3rem; margin-bottom: 18px;">🎬 CINE<span class="accent">MAX</span></div>
-
+	<div class="cm-topbar">
+	    <div>
+	        <div class="cm-brand">🎬 CINE<span class="accent">MAX</span></div>
+	        <div style="font-size: 0.85rem; color: var(--cm-cream-dim); margin-top: 4px;">
+	            Bienvenido, <span style="color: var(--cm-gold-bright); font-weight: 600;" th:text="${session.fullName}"></span> 
+	            (<span th:text="${session.rol}"></span>)
+	        </div>
+	    </div>
+	    <div class="cm-flex-between cm-gap-sm" style="width: auto;">
+	        <a th:href="@{/dashboard}" class="cm-btn cm-btn-ghost"><i class="fas fa-home"></i> Inicio</a>
+	        <button id="btnCerrarSesion" class="cm-btn cm-btn-red"><i class="fas fa-sign-out-alt"></i> Salir</button>
+	    </div>
+	</div>
     <div class="cm-ticket">
         <h2 class="cm-mt-0" style="border-bottom: 1px solid var(--cm-line); padding-bottom: 16px; margin-bottom: 24px;">
             <i class="fas fa-ticket-alt" style="font-size: 0.8em;"></i> Taquilla — Registro de Venta
@@ -22,16 +33,18 @@
 
         <form th:action="@{/cine/venta/guardar}" method="post">
 
-            <div class="cm-field">
-                <label class="cm-label" for="idFuncion">Seleccione la Función (Cartelera Vigente)</label>
-                <select name="idFuncion" id="idFuncion" class="cm-select" required>
-                    <option value="">-- Seleccione una función --</option>
-                    <option th:each="f : ${funciones}"
-                            th:value="${f.idFuncion}"
-                            th:text="|Función ${f.idFuncion} - Fecha: ${f.fecha} a las ${f.horaInicio} - Precio: S/. ${f.precioEntrada} (Disponibles: ${f.asientosDisponibles})|">
-                    </option>
-                </select>
-            </div>
+			<div class="cm-field">
+			                <label class="cm-label" for="idFuncion">1. Seleccione la Función</label>
+			                <select name="idFuncion" id="idFuncion" class="cm-select" required>
+			                    <option value="" data-precio="0">-- Seleccione una función en cartelera --</option>
+			                    
+			                    <option th:each="f : ${funciones}"
+			                            th:value="${f.idFuncion}"
+			                            th:data-precio="${f.precioEntrada}"
+			                            th:text="|${f.pelicula.titulo} (Sala ${f.sala.numeroSala}) - ${f.horaInicio} - Asientos Libres: ${f.asientosDisponibles} (S/. ${f.precioEntrada})|">
+			                    </option>
+			                </select>
+			            </div>
 
             <div class="cm-field">
                 <label class="cm-label" for="cantidad">Cantidad de Entradas</label>

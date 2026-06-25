@@ -29,6 +29,6 @@ public class Pelicula {
     @Column(nullable = false, length = 10)
     private String clasificacion;
 
-    @Column(columnDefinition = "TINYINT DEFAULT 1")
-    private Integer estado; 
+    @Column(columnDefinition = "BIT(1) DEFAULT b'1'")
+    private Boolean estado; 
 }

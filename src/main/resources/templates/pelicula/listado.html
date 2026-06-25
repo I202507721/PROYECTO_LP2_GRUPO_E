@@ -1,74 +1,55 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <title>CineMax - Listado de Películas</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" />
-    <link rel="stylesheet" th:href="@{/css/cinemax.css}">
-</head>
-<body>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="layout :: layoutBase(~{::contenido})">
 
-	<div class="cm-container" style="max-width: 1100px;">
+<div th:fragment="contenido">
+    <div class="cm-flex-between" style="margin-bottom: 20px;">
+        <h2 class="cm-mt-0">Gestión de Películas en Cartelera</h2>
+        <a th:href="@{/cine/pelicula/nuevo}" class="cm-btn cm-btn-gold"><i class="fas fa-plus"></i> Nueva Película</a>
+    </div>
 
-	    <div class="cm-topbar">
-	        <div>
-	            <div class="cm-brand" style="font-size: 1.4rem; margin-bottom: 4px;">🎬 CINE<span class="accent">MAX</span></div>
-	            <h2 class="cm-mt-0">Gestión de Películas en Cartelera</h2>
-	        </div>
-	        <div class="cm-flex-between cm-gap-sm" style="width: auto;">
-	            <a th:href="@{/cine/pelicula/nuevo}" class="cm-btn cm-btn-gold"><i class="fas fa-plus"></i> Nueva Película</a>
-	            <a th:href="@{/cine/venta/nuevo}" class="cm-btn cm-btn-outline"><i class="fas fa-ticket-alt"></i> Ir a Taquilla</a>
-	        </div>
-	    </div>
+    <div class="cm-card" style="padding: 18px 20px; margin-bottom: 24px;">
+        <form th:action="@{/cine/peliculas}" method="get" class="cm-flex-between cm-gap-sm">
+            <label for="txtGenero" class="cm-label" style="margin: 0; white-space: nowrap;">Filtrar por Género</label>
+            <input type="text" name="txtGenero" id="txtGenero" th:value="${generoBuscado}" placeholder="Ej: Ciencia Ficción, Suspenso..." class="cm-input" style="flex: 1; min-width: 200px;">
+            <button type="submit" class="cm-btn cm-btn-gold"><i class="fas fa-search"></i> Buscar</button>
+            <a th:href="@{/cine/peliculas}" class="cm-btn cm-btn-ghost">Limpiar</a>
+        </form>
+    </div>
 
-	    <div class="cm-card" style="padding: 18px 20px; margin-bottom: 24px;">
-	        <form th:action="@{/cine/peliculas}" method="get" class="cm-flex-between cm-gap-sm">
-	            <label for="txtGenero" class="cm-label" style="margin: 0; white-space: nowrap;">Filtrar por Género</label>
-	            <input type="text" name="txtGenero" id="txtGenero"
-	                   th:value="${generoBuscado}"
-	                   placeholder="Ej: Ciencia Ficción, Suspenso..."
-	                   class="cm-input" style="flex: 1; min-width: 200px;">
-	            <button type="submit" class="cm-btn cm-btn-gold"><i class="fas fa-search"></i> Buscar</button>
-	            <a th:href="@{/cine/peliculas}" class="cm-btn cm-btn-ghost">Limpiar</a>
-	        </form>
-	    </div>
+    <div class="cm-table-wrap">
+        <table class="cm-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Título</th>
+                    <th>Género</th>
+                    <th>Duración</th>
+                    <th>Clasificación</th>
+                    <th>Estado</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:if="${#lists.isEmpty(peliculas)}">
+                    <td colspan="6" style="text-align: center; color: var(--cm-cream-dim); padding: 30px;">
+                        No se encontraron películas para el género seleccionado.
+                    </td>
+                </tr>
+                <tr th:each="p : ${peliculas}">
+                    <td th:text="${p.idPelicula}">1</td>
+                    <td style="font-weight: 600; color: var(--cm-cream);" th:text="${p.titulo}">Película</td>
+                    <td th:text="${p.genero}">Género</td>
+                    <td th:text="${p.duracion} + ' min'">0 min</td>
+                    <td>
+                        <span class="cm-badge cm-badge-gold" th:text="${p.clasificacion}">PG-13</span>
+                    </td>
+                    <td>
+                        <span th:if="${p.estado}" class="cm-status-active"><i class="fas fa-circle" style="font-size: 8px;"></i> Activo</span>
+                        <span th:if="${!p.estado}" class="cm-status-inactive"><i class="fas fa-circle" style="font-size: 8px;"></i> Retirada</span>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
 
-	    <div class="cm-table-wrap">
-	        <table class="cm-table">
-	            <thead>
-	                <tr>
-	                    <th>ID</th>
-	                    <th>Título</th>
-	                    <th>Género</th>
-	                    <th>Duración</th>
-	                    <th>Clasificación</th>
-	                    <th>Estado</th>
-	                </tr>
-	            </thead>
-	            <tbody>
-	                <tr th:if="${#lists.isEmpty(peliculas)}">
-	                    <td colspan="6" style="text-align: center; color: var(--cm-cream-dim); padding: 30px;">
-	                        No se encontraron películas para el género seleccionado.
-	                    </td>
-	                </tr>
-
-	                <tr th:each="p : ${peliculas}">
-	                    <td th:text="${p.idPelicula}">1</td>
-	                    <td style="font-weight: 600; color: var(--cm-cream);" th:text="${p.titulo}">Película de Prueba</td>
-	                    <td th:text="${p.genero}">Género</td>
-	                    <td th:text="${p.duracion} + ' min'">0 min</td>
-	                    <td>
-	                        <span class="cm-badge cm-badge-gold" th:text="${p.clasificacion}">PG-13</span>
-	                    </td>
-	                    <td>
-	                        <span th:if="${p.estado == 1}" class="cm-status-active"><i class="fas fa-circle" style="font-size: 8px;"></i> Activo</span>
-	                        <span th:if="${p.estado == 0}" class="cm-status-inactive"><i class="fas fa-circle" style="font-size: 8px;"></i> Retirada</span>
-	                    </td>
-	                </tr>
-	            </tbody>
-	        </table>
-	    </div>
-	</div>
-
-</body>
 </html>

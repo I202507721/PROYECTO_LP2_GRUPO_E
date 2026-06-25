@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:fragment="layoutBase(contenido)">
+
+<head>
+    <meta charset="UTF-8">
+    <title>CineMax - Sistema de Gestión</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" th:href="@{/css/cinemax.css}">
+    
+</head>
+
+<body>
+
+    <div class="cm-container" style="max-width: 1100px;">
+        <div class="cm-topbar">
+            <div>
+                <div class="cm-brand">🎬 CINE<span class="accent">MAX</span></div>
+                <div style="font-size: 0.85rem; color: var(--cm-cream-dim); margin-top: 4px;">
+                    Bienvenido, <span style="color: var(--cm-gold-bright); font-weight: 600;" th:text="${session.fullName}"></span> 
+                    (<span th:text="${session.rol}"></span>)
+                </div>
+            </div>
+            <div class="cm-flex-between cm-gap-sm" style="width: auto;">
+                <a th:href="@{/dashboard}" class="cm-btn cm-btn-ghost"><i class="fas fa-home"></i> Inicio</a>
+                <button id="btnCerrarSesion" class="cm-btn cm-btn-red"><i class="fas fa-sign-out-alt"></i> Salir</button>
+            </div>
+        </div>
+
+        <main th:replace="${contenido}">
+            [Contenido dinámico de la página]
+        </main>
+
+        <div class="cm-footer-note" style="margin-top: 50px; border-top: 1px solid var(--cm-line); padding-top: 20px;">
+            &copy; 2026 CineMax — Todos los derechos reservados
+        </div>
+    </div>
+
+    <script>
+        document.getElementById("btnCerrarSesion").addEventListener("click", function () {
+            Swal.fire({
+                title: "¿Deseas cerrar sesión?",
+                text: "Se destruirá tu sesión activa en el sistema.",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#8c2f2f",
+                cancelButtonColor: "#262019",
+                confirmButtonText: "Sí, salir",
+                cancelButtonText: "Cancelar"
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = "/login/cerrar-sesion";
+                }
+            });
+        });
+    </script>
+
+    <th:block th:utext="${alert}"></th:block>
+    <th:block th:utext="${toast}"></th:block>
+</body>
+
+</html>
