@@ -1,8 +1,10 @@
 package com.cibertec.controller;
 
+import com.cibertec.model.Funcion;
 import com.cibertec.model.Pelicula;
 import com.cibertec.repository.FuncionRepository;
 import com.cibertec.repository.PeliculaRepository;
+import com.cibertec.repository.SalaRepository;
 import com.cibertec.util.Alert;
 
 import jakarta.servlet.http.HttpSession;
@@ -14,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 
 @Slf4j
 @Controller
@@ -21,9 +24,9 @@ import java.time.LocalDate;
 @RequiredArgsConstructor
 public class CineController {
 
-    private final PeliculaRepository peliculaRepository;
+	private final PeliculaRepository peliculaRepository;
     private final FuncionRepository funcionRepository;
-
+    private final SalaRepository salaRepository;
     // ==========================================
     // 1. MANTENIMIENTO: PELÍCULAS (CU01)
     // ==========================================
@@ -31,35 +34,57 @@ public class CineController {
     @GetMapping("/peliculas")
     public String listarPeliculas(@RequestParam(name = "txtGenero", required = false) String genero, Model model) {
         if (genero != null && !genero.trim().isEmpty()) {
-            log.info("CU01: Filtrando películas por género contenga: '{}'", genero);
-            //Ejecutamos el procedimiento almacenado
             model.addAttribute("peliculas", peliculaRepository.filtrarPorGenero(genero));
             model.addAttribute("generoBuscado", genero);
         } else {
-            log.info("CU01: Listando todas las películas activas por defecto.");
             model.addAttribute("peliculas", peliculaRepository.findByEstado(true));
         }
         return "pelicula/listado";
     }
 
+    //Enviamos la lista de las 12 salas a la vista
     @GetMapping("/pelicula/nuevo")
     public String formularioPelicula(Model model) {
+        log.info("CU01: Cargando formulario de registro con listado de salas.");
         model.addAttribute("pelicula", new Pelicula());
+        model.addAttribute("salas", salaRepository.findAll());
         return "pelicula/nuevo";
     }
 
+    // GUARDADO AUTOMATIZADO: Guarda película y genera su primera función
     @PostMapping("/pelicula/guardar")
-    public String guardarPelicula(@ModelAttribute("pelicula") Pelicula pelicula, Model model, RedirectAttributes flash) {
+    public String guardarPelicula(
+            @ModelAttribute("pelicula") Pelicula pelicula, 
+            @RequestParam("idSala") Integer idSala,
+            @RequestParam("fechaFuncion") LocalDate fechaFuncion,
+            @RequestParam("horaFuncion") LocalTime horaFuncion, 
+            Model model, 
+            RedirectAttributes flash) {
         try {
+            log.info("CU01: Iniciando registro de película y automatización de función.");
+
             pelicula.setEstado(true); 
-            peliculaRepository.save(pelicula);
+            Pelicula peliculaRegistrada = peliculaRepository.save(pelicula);
+
+            var salaSeleccionada = salaRepository.findById(idSala).orElseThrow();
+   
+            Funcion nuevaFuncion = new Funcion();
+            nuevaFuncion.setPelicula(peliculaRegistrada);
+            nuevaFuncion.setSala(salaSeleccionada);
+            nuevaFuncion.setFecha(fechaFuncion); 
+            nuevaFuncion.setHoraInicio(horaFuncion); 
+            nuevaFuncion.setPrecioEntrada(salaSeleccionada.getPrecioBase());
+            nuevaFuncion.setAsientosDisponibles(salaSeleccionada.getCapacidad());
             
-            // Usamos SweetAlert para una notificación elegante
-            flash.addFlashAttribute("alert", Alert.sweetAlertSuccess("Película registrada correctamente."));
+            funcionRepository.save(nuevaFuncion); 
+            
+            flash.addFlashAttribute("alert", Alert.sweetAlertSuccess(
+                "Película registrada. Función programada para el " + fechaFuncion + " a las " + horaFuncion));
             return "redirect:/cine/peliculas";
         } catch (Exception e) {
-            log.error("Error al guardar la película: {}", e.getMessage());
-            model.addAttribute("alert", Alert.sweetAlertError("No se pudo registrar la película. Verifique los datos."));
+            log.error("Error en el flujo combinado de registro: {}", e.getMessage());
+            model.addAttribute("salas", salaRepository.findAll()); 
+            model.addAttribute("alert", Alert.sweetAlertError("No se pudo procesar el registro. Verifique los campos."));
             return "pelicula/nuevo";
         }
     }

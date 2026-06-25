@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
+import java.math.BigDecimal;
 
 @Entity
 @Table(name = "sala")
@@ -25,4 +26,8 @@ public class Sala {
 
     @Column(name = "tipo_proyeccion", nullable = false, length = 10)
     private String tipoProyeccion;
+
+    // NUEVO CAMPO MAPEADO
+    @Column(name = "precio_base", nullable = false, precision = 10, scale = 2)
+    private BigDecimal precioBase;
 }

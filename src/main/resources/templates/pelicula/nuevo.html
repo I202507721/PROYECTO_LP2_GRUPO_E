@@ -14,37 +14,70 @@
 
     <div class="cm-card">
         <h2 class="cm-mt-0" style="border-bottom: 1px solid var(--cm-line); padding-bottom: 16px; margin-bottom: 24px;">
-            <i class="fas fa-film" style="font-size: 0.8em;"></i> Registrar Nueva Película
+            <i class="fas fa-film" style="font-size: 0.8em;"></i> Registrar Película y Asignar Sala
         </h2>
-
-        <div th:if="${error}" class="cm-alert cm-alert-error" th:text="${error}"></div>
 
         <form th:action="@{/cine/pelicula/guardar}" th:object="${pelicula}" method="post">
 
             <div class="cm-field">
                 <label class="cm-label" for="titulo">Título de la Película</label>
-                <input type="text" id="titulo" class="cm-input" th:field="*{titulo}" required placeholder="Ej: Avengers: Endgame">
+                <input type="text" id="titulo" class="cm-input" th:field="*{titulo}" required placeholder="Ej: Sci-Fi Odyssey 2026">
             </div>
 
             <div class="cm-field">
                 <label class="cm-label" for="genero">Género</label>
-                <input type="text" id="genero" class="cm-input" th:field="*{genero}" required placeholder="Ej: Acción">
+                <input type="text" id="genero" class="cm-input" th:field="*{genero}" required placeholder="Ej: Ciencia Ficción">
             </div>
 
-            <div class="cm-field">
-                <label class="cm-label" for="duracion">Duración (minutos)</label>
-                <input type="number" id="duracion" class="cm-input" th:field="*{duracion}" required min="1">
+            <div class="cm-flex-between cm-gap-sm">
+                <div class="cm-field" style="flex: 1;">
+                    <label class="cm-label" for="duracion">Duración (min)</label>
+                    <input type="number" id="duracion" class="cm-input" th:field="*{duracion}" required min="1" placeholder="120">
+                </div>
+
+                <div class="cm-field" style="flex: 1;">
+                    <label class="cm-label" for="clasificacion">Clasificación</label>
+                    <select id="clasificacion" class="cm-select" th:field="*{clasificacion}" required>
+                        <option value="">-- Seleccione --</option>
+                        <option value="ATP">Apta Todos (APT)</option>
+                        <option value="PG-13">Mayores 13 (PG-13)</option>
+                        <option value="Mayores 14">Mayores de 14</option>
+                        <option value="Mayores 18">Mayores de 18</option>
+                    </select>
+                </div>
             </div>
 
+			<div class="cm-field">
+			                <label class="cm-label" for="idSala">Asignar Sala de Estreno</label>
+			                <select name="idSala" id="idSala" class="cm-select" required>
+			                    <option value="" data-precio="0.00" data-tipo="ST">-- Seleccione una Sala --</option>
+			                    <option th:each="s : ${salas}" 
+			                            th:value="${s.idSala}"
+			                            th:data-precio="${s.precioBase}"
+			                            th:data-tipo="${s.tipoProyeccion}"
+			                            th:text="|Sala ${s.numeroSala} — Formato: ${s.tipoProyeccion} (Aforo: ${s.capacidad})|">
+			                    </option>
+			                </select>
+			            </div>
+
+			            <div class="cm-flex-between cm-gap-sm">
+			                <div class="cm-field" style="flex: 1;">
+			                    <label class="cm-label" for="fechaFuncion">Fecha de Función</label>
+			                    <input type="date" name="fechaFuncion" id="fechaFuncion" class="cm-input" required>
+			                </div>
+
+			                <div class="cm-field" style="flex: 1;">
+			                    <label class="cm-label" for="horaFuncion">Hora de Inicio</label>
+			                    <input type="time" name="horaFuncion" id="horaFuncion" class="cm-input" required>
+			                </div>
+			            </div>
+
             <div class="cm-field">
-                <label class="cm-label" for="clasificacion">Clasificación</label>
-                <select id="clasificacion" class="cm-select" th:field="*{clasificacion}" required>
-                    <option value="">-- Seleccione --</option>
-                    <option value="ATP">Apta para Todos (APT)</option>
-                    <option value="PG-13">Mayores de 13 (PG-13)</option>
-                    <option value="Mayores 14">Mayores de 14</option>
-                    <option value="Mayores 18">Mayores de 18</option>
-                </select>
+                <label class="cm-label">Costo de Entrada Programado (Automático)</label>
+                <div style="background: var(--cm-charcoal); border: 1px solid var(--cm-line); border-left: 4px solid var(--cm-gold); padding: 14px; border-radius: var(--cm-radius-sm); display: flex; justify-content: space-between; align-items: center;">
+                    <span style="font-size: 0.9rem; color: var(--cm-cream-dim);">Formato de Proyección: <strong id="txtTipo" style="color: var(--cm-cream);">Ninguno</strong></span>
+                    <span style="font-size: 1.3rem; font-family: var(--cm-display); color: var(--cm-gold-bright);">S/. <span id="txtPrecio">0.00</span></span>
+                </div>
             </div>
 
             <div class="cm-flex-between" style="margin-top: 28px;">
@@ -54,6 +87,32 @@
         </form>
     </div>
 </div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const selectSala = document.getElementById("idSala");
+        const labelPrecio = document.getElementById("txtPrecio");
+        const labelTipo = document.getElementById("txtTipo");
+
+        selectSala.addEventListener("change", function() {
+
+            const opcionSeleccionada = selectSala.options[selectSala.selectedIndex];
+
+            const precio = parseFloat(opcionSeleccionada.getAttribute("data-precio")) || 0;
+            const tipo = opcionSeleccionada.getAttribute("data-tipo") || "Ninguno";
+
+            labelPrecio.textContent = precio.toFixed(2);
+            labelTipo.textContent = tipo;
+        });
+    });
+	
+	// Bloquear fechas pasadas en el input de fecha
+	    const inputFecha = document.getElementById("fechaFuncion");
+	    if (inputFecha) {
+	        const hoy = new Date().toISOString().split('T')[0];
+	        inputFecha.setAttribute('min', hoy);
+	    }
+</script>
 
 </body>
 </html>

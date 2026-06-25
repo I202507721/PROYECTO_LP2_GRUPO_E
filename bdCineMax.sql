@@ -13,7 +13,7 @@ USE `bd_cine`;
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 -- ==========================================
--- 1. TIPO USUARIO (Equivalente a tbl_tipo)
+-- 1. ESTRUCTURA Y DATOS: tipo_usuario
 -- ==========================================
 DROP TABLE IF EXISTS `tipo_usuario`;
 CREATE TABLE `tipo_usuario` (
@@ -29,7 +29,7 @@ INSERT INTO `tipo_usuario` VALUES (1,'Administrador'),(2,'Taquillero');
 UNLOCK TABLES;
 
 -- ==========================================
--- 2. USUARIO
+-- 2. ESTRUCTURA Y DATOS: usuario
 -- ==========================================
 DROP TABLE IF EXISTS `usuario`;
 CREATE TABLE `usuario` (
@@ -56,7 +56,7 @@ INSERT INTO `usuario` VALUES
 UNLOCK TABLES;
 
 -- ==========================================
--- 3. PELÍCULA
+-- 3. ESTRUCTURA Y DATOS: pelicula
 -- ==========================================
 DROP TABLE IF EXISTS `pelicula`;
 CREATE TABLE `pelicula` (
@@ -81,7 +81,7 @@ INSERT INTO `pelicula` VALUES
 UNLOCK TABLES;
 
 -- ==========================================
--- 4. SALA
+-- 4. ESTRUCTURA Y DATOS: sala (Las 12 Salas Configuradas)
 -- ==========================================
 DROP TABLE IF EXISTS `sala`;
 CREATE TABLE `sala` (
@@ -89,18 +89,31 @@ CREATE TABLE `sala` (
   `numero_sala` int NOT NULL,
   `capacidad` int NOT NULL,
   `tipo_proyeccion` varchar(10) NOT NULL,
+  `precio_base` decimal(10,2) NOT NULL DEFAULT '12.50',
   PRIMARY KEY (`id_sala`),
   UNIQUE KEY `numero_sala` (`numero_sala`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 LOCK TABLES `sala` WRITE;
 /*!40000 ALTER TABLE `sala` DISABLE KEYS */;
-INSERT INTO `sala` VALUES (1,1,100,'2D'),(2,2,80,'3D'),(3,3,40,'Prime');
+INSERT INTO `sala` VALUES 
+(1,1,100,'2D',12.50),
+(2,2,100,'2D',12.50),
+(3,3,100,'2D',12.50),
+(4,4,100,'2D',12.50),
+(5,5,100,'2D',12.50),
+(6,6,100,'2D',12.50),
+(7,7,100,'2D',12.50),
+(8,8,100,'2D',12.50),
+(9,9,100,'2D',12.50),
+(10,10,80,'3D',17.00),
+(11,11,80,'3D',17.00),
+(12,12,120,'3D XL',21.90);
 /*!40000 ALTER TABLE `sala` ENABLE KEYS */;
 UNLOCK TABLES;
 
 -- ==========================================
--- 5. FUNCIÓN
+-- 5. ESTRUCTURA Y DATOS: funcion
 -- ==========================================
 DROP TABLE IF EXISTS `funcion`;
 CREATE TABLE `funcion` (
@@ -121,16 +134,16 @@ CREATE TABLE `funcion` (
 LOCK TABLES `funcion` WRITE;
 /*!40000 ALTER TABLE `funcion` DISABLE KEYS */;
 INSERT INTO `funcion` VALUES 
-(1,1,1,CURDATE(),'15:00:00',15.00,98),
-(2,1,2,CURDATE(),'19:30:00',22.00,80),
-(3,2,3,CURDATE(),'21:00:00',35.00,39),
-(4,3,1,CURDATE(),'11:00:00',12.00,100),
-(5,4,2,DATE_ADD(CURDATE(), INTERVAL 1 DAY),'18:00:00',20.00,80);
+(1,1,1,CURDATE(),'15:00:00',12.50,98),   -- Sala 1 (2D: S/.12.50) -> 2 asientos vendidos en prueba
+(2,1,10,CURDATE(),'19:30:00',17.00,80),  -- Sala 10 (3D: S/.17.00)
+(3,2,12,CURDATE(),'21:00:00',21.90,119), -- Sala 12 (3D XL: S/.21.90) -> 1 asiento vendido en prueba
+(4,3,2,CURDATE(),'11:00:00',12.50,100),  -- Sala 2 (2D: S/.12.50)
+(5,4,3,DATE_ADD(CURDATE(), INTERVAL 1 DAY),'18:00:00',12.50,100);
 /*!40000 ALTER TABLE `funcion` ENABLE KEYS */;
 UNLOCK TABLES;
 
 -- ==========================================
--- 6. VENTA CABECERA
+-- 6. ESTRUCTURA Y DATOS: venta_cabecera
 -- ==========================================
 DROP TABLE IF EXISTS `venta_cabecera`;
 CREATE TABLE `venta_cabecera` (
@@ -145,19 +158,21 @@ CREATE TABLE `venta_cabecera` (
 
 LOCK TABLES `venta_cabecera` WRITE;
 /*!40000 ALTER TABLE `venta_cabecera` DISABLE KEYS */;
-INSERT INTO `venta_cabecera` VALUES (1,2,CURRENT_TIMESTAMP,30.00),(2,3,CURRENT_TIMESTAMP,35.00);
+-- Transacción 1: Ana vende 2 entradas para la Función 1 (2 * 12.50 = S/. 25.00)
+-- Transacción 2: Luis vende 1 entrada para la Función 3 (1 * 21.90 = S/. 21.90)
+INSERT INTO `venta_cabecera` VALUES (1,2,CURRENT_TIMESTAMP,25.00),(2,3,CURRENT_TIMESTAMP,21.90);
 /*!40000 ALTER TABLE `venta_cabecera` ENABLE KEYS */;
 UNLOCK TABLES;
 
 -- ==========================================
--- 7. VENTA DETALLE
+-- 7. ESTRUCTURA Y DATOS: venta_detalle
 -- ==========================================
 DROP TABLE IF EXISTS `venta_detalle`;
 CREATE TABLE `venta_detalle` (
   `id_detalle` int NOT NULL AUTO_INCREMENT,
   `id_venta` int DEFAULT NULL,
   `id_funcion` int DEFAULT NULL,
-  `cantidad_entradas` int NOT NULL,
+  `amount_tickets` int NOT NULL, -- cantidad_entradas
   `subtotal` decimal(10,2) NOT NULL,
   PRIMARY KEY (`id_detalle`),
   KEY `fk_detalle_venta` (`id_venta`),
@@ -168,12 +183,12 @@ CREATE TABLE `venta_detalle` (
 
 LOCK TABLES `venta_detalle` WRITE;
 /*!40000 ALTER TABLE `venta_detalle` DISABLE KEYS */;
-INSERT INTO `venta_detalle` VALUES (1,1,1,2,30.00),(2,2,3,1,35.00);
+INSERT INTO `venta_detalle` VALUES (1,1,1,2,25.00),(2,2,3,1,21.90);
 /*!40000 ALTER TABLE `venta_detalle` ENABLE KEYS */;
 UNLOCK TABLES;
 
 -- ==========================================
--- 8. ASIENTO OCUPADO
+-- 8. ESTRUCTURA Y DATOS: asiento_ocupado
 -- ==========================================
 DROP TABLE IF EXISTS `asiento_ocupado`;
 CREATE TABLE `asiento_ocupado` (
@@ -195,7 +210,7 @@ INSERT INTO `asiento_ocupado` VALUES (1,1,1,'A1'),(2,1,1,'A2'),(3,3,2,'P5');
 UNLOCK TABLES;
 
 -- ==========================================
--- VISTAS (VIEWS)
+-- VISTAS (VIEWS) — OPTIMIZADAS PARA JASPERSOFT
 -- ==========================================
 DROP VIEW IF EXISTS `v_header_venta`;
 CREATE VIEW `v_header_venta` AS 
@@ -214,8 +229,8 @@ SELECT
   `vd`.`id_venta` AS `num_venta`,
   `p`.`titulo` AS `pelicula`,
   `s`.`numero_sala` AS `sala`,
-  `vd`.`cantidad_entradas` AS `cantidad`,
-  (`vd`.`subtotal` / `vd`.`cantidad_entradas`) AS `precio_unitario`,
+  `vd`.`amount_tickets` AS `cantidad`,
+  (`vd`.`subtotal` / `vd`.`amount_tickets`) AS `precio_unitario`,
   `vd`.`subtotal` AS `sub_total`
 FROM `venta_detalle` `vd`
 JOIN `funcion` `f` ON `vd`.`id_funcion` = `f`.`id_funcion`
@@ -223,7 +238,7 @@ JOIN `pelicula` `p` ON `f`.`id_pelicula` = `p`.`id_pelicula`
 JOIN `sala` `s` ON `f`.`id_sala` = `s`.`id_sala`;
 
 -- ==========================================
--- PROCEDIMIENTOS ALMACENADOS
+-- PROCEDIMIENTOS ALMACENADOS (STORED PROCEDURES)
 -- ==========================================
 DELIMITER $$
 DROP PROCEDURE IF EXISTS `sp_iniciar_sesion`$$
@@ -281,7 +296,7 @@ BEGIN
         SET v_subtotal = v_precio_entrada * p_cantidad_entradas;
         INSERT INTO venta_cabecera (id_usuario, total_pagado) VALUES (p_id_usuario, v_subtotal);
         SET v_id_venta = LAST_INSERT_ID();
-        INSERT INTO venta_detalle (id_venta, id_funcion, cantidad_entradas, subtotal)
+        INSERT INTO venta_detalle (id_venta, id_funcion, amount_tickets, subtotal)
         VALUES (v_id_venta, p_id_funcion, p_cantidad_entradas, v_subtotal);
         
         UPDATE funcion SET asientos_disponibles = asientos_disponibles - p_cantidad_entradas
