@@ -15,11 +15,11 @@
                     <th>Vendidos</th>
                     <th>Disponibles</th>
                     <th>% Ocupación</th>
-                </tr>
+                    <th style="text-align: center;">Acciones</th> </tr>
             </thead>
             <tbody>
                 <tr th:if="${#lists.isEmpty(ocupaciones)}">
-                    <td colspan="7" style="text-align: center; color: var(--cm-cream-dim); padding: 30px;">
+                    <td colspan="8" style="text-align: center; color: var(--cm-cream-dim); padding: 30px;">
                         No hay funciones programadas para el día de hoy.
                     </td>
                 </tr>
@@ -37,6 +37,11 @@
                             </div>
                             <span class="cm-badge cm-badge-gold" th:text="${o.porcentajeOcupacion} + '%'">0%</span>
                         </div>
+                    </td>
+                    <td style="text-align: center;">
+                        <a th:href="@{/cine/reporte/funcion-ventas(idFuncion=${o.idFuncion})}" class="cm-btn cm-btn-ghost" style="padding: 6px 12px; font-size: 0.8rem; border-color: var(--cm-line);">
+                            <i class="fas fa-eye"></i> Ver Ventas
+                        </a>
                     </td>
                 </tr>
             </tbody>

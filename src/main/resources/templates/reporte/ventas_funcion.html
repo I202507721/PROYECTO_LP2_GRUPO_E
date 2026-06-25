@@ -1,0 +1,63 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="layout :: layoutBase(~{::contenido})">
+
+<div th:fragment="contenido">
+    
+    <div class="cm-card" style="margin-bottom: 24px; border-left: 4px solid var(--cm-gold);">
+        <div class="cm-flex-between">
+            <div>
+                <span class="cm-badge cm-badge-gold" style="margin-bottom: 6px;" th:text="|Función N° ${funcion.idFuncion}|"></span>
+                <h1 class="cm-mt-0" style="margin-bottom: 4px;" th:text="${funcion.pelicula.titulo}">Película</h1>
+                <p style="margin: 0; color: var(--cm-cream-dim);">
+                    <i class="fas fa-door-open"></i> <span th:text="|Sala ${funcion.sala.numeroSala} (${funcion.sala.tipoProyeccion})|"></span> &nbsp;|&nbsp; 
+                    <i class="far fa-calendar-alt"></i> <span th:text="${funcion.fecha}"></span> &nbsp;|&nbsp; 
+                    <i class="far fa-clock"></i> <span th:text="${funcion.horaInicio}"></span>
+                </p>
+            </div>
+            <a th:href="@{/cine/reporte/ocupacion}" class="cm-btn cm-btn-ghost">
+                <i class="fa-solid fa-reply"></i> Volver al Reporte
+            </a>
+        </div>
+    </div>
+
+    <h3 style="margin-bottom: 14px;"><i class="fas fa-clipboard-list"></i> Relación de Boletas Vendidas</h3>
+    <div class="cm-table-wrap">
+        <table class="cm-table">
+            <thead>
+                <tr>
+                    <th style="text-align: center;">Código Venta</th>
+                    <th>Fecha de Operación</th>
+                    <th>Taquillero</th>
+                    <th style="text-align: center;">Tickets</th>
+                    <th>Asientos Asignados</th>
+                    <th style="text-align: right;">Monto Total</th>
+                    <th style="text-align: center;">Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:if="${#lists.isEmpty(ventas)}">
+                    <td colspan="7" style="text-align: center; color: var(--cm-cream-dim); padding: 35px;">
+                        No se registran boletas vendidas para esta función en particular.
+                    </td>
+                </tr>
+                <tr th:each="v : ${ventas}">
+                    <td th:text="${v.numVentaText}" class="text-center" style="font-weight: 600; color: var(--cm-gold-bright);"></td>
+                    <td th:text="${v.fechaText}"></td>
+                    <td th:text="${v.taquillero}"></td>
+                    <td th:text="${v.cantidadEntradas}" class="text-center"></td>
+                    <td>
+                        <span style="font-family: monospace; color: var(--cm-gold);" th:text="${v.asientos}">A1, A2</span>
+                    </td>
+                    <td th:text="|S/. ${#numbers.formatDecimal(v.subtotal, 1, 'COMMA', 2, 'POINT')}|" class="text-end" style="font-weight: 600;"></td>
+                    <td style="text-align: center;">
+                        <a th:href="@{/cine/reporte/ticket(idVenta=${v.idVenta})}" target="_blank" class="cm-btn cm-btn-ghost" style="padding: 4px 10px; font-size: 0.8rem; color: var(--cm-red-bright); border-color: var(--cm-line);">
+                            <i class="fa-solid fa-file-pdf"></i> PDF
+                        </a>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+</html>

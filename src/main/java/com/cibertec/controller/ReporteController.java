@@ -1,5 +1,6 @@
 package com.cibertec.controller;
 
+import com.cibertec.repository.FuncionRepository;
 import com.cibertec.repository.ReporteRepository;
 import com.cibertec.service.ReporteJasperService;
 import lombok.RequiredArgsConstructor;
@@ -23,8 +24,9 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class ReporteController {
 
-    private final ReporteRepository reporteRepository;
+	private final ReporteRepository reporteRepository;
     private final ReporteJasperService reporteJasperService;
+    private final FuncionRepository funcionRepository;
 
     // ==========================================
     // REPORTE: OCUPACIÓN DE SALAS (CU09 - HTML)
@@ -35,32 +37,32 @@ public class ReporteController {
         model.addAttribute("ocupaciones", reporteRepository.obtenerOcupacionSalas());
         return "reporte/ocupacion";
     }
+ // NUEVO ENDPOINT: Detalle de ventas por función seleccionada
+    @GetMapping("/reporte/funcion-ventas")
+    public String verVentasPorFuncion(@RequestParam("idFuncion") Integer idFuncion, Model model) {
+        log.info("Cargando detalle de boletas de la función ID: {}", idFuncion);
+        
+        // Obtenemos los datos de la función (Película, Sala, Horario) de forma segura
+        var funcion = funcionRepository.findById(idFuncion).orElseThrow();
+        
+        model.addAttribute("funcion", funcion);
+        model.addAttribute("ventas", reporteRepository.obtenerVentasPorFuncion(idFuncion));
+        return "reporte/ventas_funcion";
+    }
 
-    // ==========================================
-    // REPORTE: TICKET DE ENTRADA (JASPER - PDF)
-    // ==========================================
+    // Impresión de Ticket PDF con Jaspersoft
     @GetMapping("/reporte/ticket")
-    public void imprimirTicket(@RequestParam("idVenta") Integer idVenta, HttpServletResponse response) throws Exception {
-        log.info("Generando Ticket PDF para la venta ID: {}", idVenta);
-
-        // Ruta del diseño dentro de src/main/resources
+    public void imprimirTicket(@RequestParam("idVenta") Integer idVenta, jakarta.servlet.http.HttpServletResponse response) throws Exception {
         String reportPath = "/reporte/ticket_venta.jrxml";
-
-        // Mapeo del parámetro definido en Jaspersoft Studio
-        Map<String, Object> params = new HashMap<>();
+        java.util.Map<String, Object> params = new java.util.HashMap<>();
         params.put("p_id_venta", idVenta);
         
-        // Generación del objeto imprimible
-        JasperPrint jasperPrint = reporteJasperService.getJasperPrint(params, reportPath);
-
-        // Configuración de las cabeceras de respuesta HTTP
+        net.sf.jasperreports.engine.JasperPrint jasperPrint = reporteJasperService.getJasperPrint(params, reportPath);
         response.setContentType("application/pdf");
         response.setHeader("Content-Disposition", String.format("inline; filename=Ticket-Venta-%s.pdf", idVenta));
 
-        // Transmisión del flujo de datos del PDF directamente al navegador
-        OutputStream outputStream = response.getOutputStream();
-        JasperExportManager.exportReportToPdfStream(jasperPrint, outputStream);
-
+        java.io.OutputStream outputStream = response.getOutputStream();
+        net.sf.jasperreports.engine.JasperExportManager.exportReportToPdfStream(jasperPrint, outputStream);
         outputStream.flush();
         outputStream.close();
     }
