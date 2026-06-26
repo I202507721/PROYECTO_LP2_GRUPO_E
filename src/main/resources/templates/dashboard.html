@@ -25,6 +25,14 @@
             <p>Visualiza el porcentaje de ocupación de cada sala en el día.</p>
             <a th:href="@{/cine/reporte/ocupacion}" class="cm-btn cm-btn-gold">Ver Reporte <i class="fas fa-arrow-right"></i></a>
         </div>
+
+        <!-- NUEVO: Solo visible para Administrador -->
+        <div class="cm-option-card" th:if="${session.rol == 'Administrador'}">
+            <div class="cm-icon"><i class="fas fa-users"></i></div>
+            <h3 class="cm-mt-0" style="margin-bottom: 0;">Gestión de Usuarios</h3>
+            <p>Administra los taquilleros y usuarios del sistema.</p>
+            <a th:href="@{/admin/usuarios}" class="cm-btn cm-btn-gold">Ver Usuarios <i class="fas fa-arrow-right"></i></a>
+        </div>
     </div>
 </div>
 

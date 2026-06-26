@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="layout :: layoutBase(~{::contenido})">
+
+<div th:fragment="contenido">
+    <div class="cm-flex-between" style="margin-bottom: 20px;">
+        <h2 class="cm-mt-0">Gestión de Usuarios</h2>
+        <a th:href="@{/dashboard}" class="cm-btn cm-btn-ghost">
+            <i class="fas fa-arrow-left"></i> Volver
+        </a>
+    </div>
+
+    <div class="cm-table-wrap">
+        <table class="cm-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nombre</th>
+                    <th>Username</th>
+                    <th>Rol</th>
+                    <th>Estado</th>
+                    <th>Acción</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:if="${#lists.isEmpty(usuarios)}">
+                    <td colspan="6" style="text-align: center; color: var(--cm-cream-dim); padding: 30px;">
+                        No hay usuarios registrados.
+                    </td>
+                </tr>
+                <tr th:each="u : ${usuarios}">
+                    <td th:text="${u.idUsuario}">1</td>
+                    <td style="font-weight: 600; color: var(--cm-cream);" th:text="${u.nombre}">Nombre</td>
+                    <td th:text="${u.username}">username</td>
+                    <td>
+                        <span class="cm-badge cm-badge-gold" th:text="${u.rol}">Rol</span>
+                    </td>
+                    <td>
+                        <span th:if="${u.activo}" class="cm-status-active">
+                            <i class="fas fa-circle" style="font-size: 8px;"></i> Activo
+                        </span>
+                        <span th:if="${!u.activo}" class="cm-status-inactive">
+                            <i class="fas fa-circle" style="font-size: 8px;"></i> Inactivo
+                        </span>
+                    </td>
+                    <td>
+                        <a th:href="@{/admin/usuario/toggle/{id}(id=${u.idUsuario})}"
+                           th:class="${u.activo} ? 'cm-btn cm-btn-red' : 'cm-btn cm-btn-gold'"
+                           th:text="${u.activo} ? 'Desactivar' : 'Activar'">
+                        </a>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+</html>
