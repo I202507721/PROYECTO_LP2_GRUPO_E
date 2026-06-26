@@ -50,7 +50,7 @@
                     </td>
                     <td th:text="|S/. ${#numbers.formatDecimal(v.subtotal, 1, 'COMMA', 2, 'POINT')}|" class="text-end" style="font-weight: 600;"></td>
                     <td style="text-align: center;">
-                        <a th:href="@{/cine/reporte/ticket(idVenta=${v.idVenta})}" target="_blank" class="cm-btn cm-btn-ghost" style="padding: 4px 10px; font-size: 0.8rem; color: var(--cm-red-bright); border-color: var(--cm-line);">
+                        <a th:href="@{/cine/reporte/boleta(idVenta=${v.idVenta})}" target="_blank" class="cm-btn cm-btn-ghost" style="padding: 4px 10px; font-size: 0.8rem; color: var(--cm-red-bright); border-color: var(--cm-line);">
                             <i class="fa-solid fa-file-pdf"></i> PDF
                         </a>
                     </td>

@@ -58,20 +58,23 @@ public class ReporteController {
 	}
 
 	// Impresión de Ticket PDF con Jaspersoft
-	@GetMapping("/reporte/ticket")
-	public void imprimirTicket(@RequestParam("idVenta") Integer idVenta,
-			jakarta.servlet.http.HttpServletResponse response) throws Exception {
-		String reportPath = "/reporte/ticket_venta.jrxml";
-		java.util.Map<String, Object> params = new java.util.HashMap<>();
-		params.put("p_id_venta", idVenta);
+	@org.springframework.web.bind.annotation.ResponseBody 
+    @GetMapping("/reporte/boleta")
+    public void imprimirBoleta(@RequestParam("idVenta") Integer idVenta,
+                               jakarta.servlet.http.HttpServletResponse response) throws Exception {
+        String reportPath = "/reporte/boleta.jrxml"; // O la ruta que te haya funcionado
+        java.util.Map<String, Object> params = new java.util.HashMap<>();
+        
+        //Debe coincidir con Jaspersoft
+        params.put("pNumBoleta", idVenta); 
 
-		net.sf.jasperreports.engine.JasperPrint jasperPrint = reporteJasperService.getJasperPrint(params, reportPath);
-		response.setContentType("application/pdf");
-		response.setHeader("Content-Disposition", String.format("inline; filename=Ticket-Venta-%s.pdf", idVenta));
+        net.sf.jasperreports.engine.JasperPrint jasperPrint = reporteJasperService.getJasperPrint(params, reportPath);
+        response.setContentType("application/pdf");
+        response.setHeader("Content-Disposition", String.format("inline; filename=Ticket-Venta-%s.pdf", idVenta));
 
-		java.io.OutputStream outputStream = response.getOutputStream();
-		net.sf.jasperreports.engine.JasperExportManager.exportReportToPdfStream(jasperPrint, outputStream);
-		outputStream.flush();
-		outputStream.close();
-	}
+        java.io.OutputStream outputStream = response.getOutputStream();
+        net.sf.jasperreports.engine.JasperExportManager.exportReportToPdfStream(jasperPrint, outputStream);
+        outputStream.flush();
+        outputStream.close();
+    }
 }
