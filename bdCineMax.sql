@@ -81,7 +81,7 @@ INSERT INTO `pelicula` VALUES
 UNLOCK TABLES;
 
 -- ==========================================
--- 4. ESTRUCTURA Y DATOS: sala (Las 12 Salas Configuradas)
+-- 4. ESTRUCTURA Y DATOS: sala (Las 12 Salas)
 -- ==========================================
 DROP TABLE IF EXISTS `sala`;
 CREATE TABLE `sala` (
@@ -134,10 +134,10 @@ CREATE TABLE `funcion` (
 LOCK TABLES `funcion` WRITE;
 /*!40000 ALTER TABLE `funcion` DISABLE KEYS */;
 INSERT INTO `funcion` VALUES 
-(1,1,1,CURDATE(),'15:00:00',12.50,98),   -- Sala 1 (2D: S/.12.50) -> 2 asientos vendidos en prueba
-(2,1,10,CURDATE(),'19:30:00',17.00,80),  -- Sala 10 (3D: S/.17.00)
-(3,2,12,CURDATE(),'21:00:00',21.90,119), -- Sala 12 (3D XL: S/.21.90) -> 1 asiento vendido en prueba
-(4,3,2,CURDATE(),'11:00:00',12.50,100),  -- Sala 2 (2D: S/.12.50)
+(1,1,1,CURDATE(),'15:00:00',12.50,98),   
+(2,1,10,CURDATE(),'19:30:00',17.00,80),  
+(3,2,12,CURDATE(),'21:00:00',21.90,119), 
+(4,3,2,CURDATE(),'11:00:00',12.50,100),  
 (5,4,3,DATE_ADD(CURDATE(), INTERVAL 1 DAY),'18:00:00',12.50,100);
 /*!40000 ALTER TABLE `funcion` ENABLE KEYS */;
 UNLOCK TABLES;
@@ -158,21 +158,19 @@ CREATE TABLE `venta_cabecera` (
 
 LOCK TABLES `venta_cabecera` WRITE;
 /*!40000 ALTER TABLE `venta_cabecera` DISABLE KEYS */;
--- Transacción 1: Ana vende 2 entradas para la Función 1 (2 * 12.50 = S/. 25.00)
--- Transacción 2: Luis vende 1 entrada para la Función 3 (1 * 21.90 = S/. 21.90)
 INSERT INTO `venta_cabecera` VALUES (1,2,CURRENT_TIMESTAMP,25.00),(2,3,CURRENT_TIMESTAMP,21.90);
 /*!40000 ALTER TABLE `venta_cabecera` ENABLE KEYS */;
 UNLOCK TABLES;
 
 -- ==========================================
--- 7. ESTRUCTURA Y DATOS: venta_detalle
+-- 7. ESTRUCTURA Y DATOS: venta_detalle (Columna Integrada)
 -- ==========================================
 DROP TABLE IF EXISTS `venta_detalle`;
 CREATE TABLE `venta_detalle` (
   `id_detalle` int NOT NULL AUTO_INCREMENT,
   `id_venta` int DEFAULT NULL,
   `id_funcion` int DEFAULT NULL,
-  `amount_tickets` int NOT NULL, -- cantidad_entradas
+  `cantidad_entradas` int NOT NULL, 
   `subtotal` decimal(10,2) NOT NULL,
   PRIMARY KEY (`id_detalle`),
   KEY `fk_detalle_venta` (`id_venta`),
@@ -210,7 +208,7 @@ INSERT INTO `asiento_ocupado` VALUES (1,1,1,'A1'),(2,1,1,'A2'),(3,3,2,'P5');
 UNLOCK TABLES;
 
 -- ==========================================
--- VISTAS (VIEWS) — OPTIMIZADAS PARA JASPERSOFT
+-- VISTAS (VIEWS) — OPTIMIZADAS CON LA NUEVA COLUMNA
 -- ==========================================
 DROP VIEW IF EXISTS `v_header_venta`;
 CREATE VIEW `v_header_venta` AS 
@@ -229,8 +227,8 @@ SELECT
   `vd`.`id_venta` AS `num_venta`,
   `p`.`titulo` AS `pelicula`,
   `s`.`numero_sala` AS `sala`,
-  `vd`.`amount_tickets` AS `cantidad`,
-  (`vd`.`subtotal` / `vd`.`amount_tickets`) AS `precio_unitario`,
+  `vd`.`cantidad_entradas` AS `cantidad`, 
+  (`vd`.`subtotal` / `vd`.`cantidad_entradas`) AS `precio_unitario`, 
   `vd`.`subtotal` AS `sub_total`
 FROM `venta_detalle` `vd`
 JOIN `funcion` `f` ON `vd`.`id_funcion` = `f`.`id_funcion`
@@ -273,33 +271,48 @@ DELIMITER ;
 DELIMITER $$
 DROP PROCEDURE IF EXISTS `sp_registrar_venta_completa`$$
 CREATE PROCEDURE `sp_registrar_venta_completa`(
-    IN p_id_usuario INT, IN p_id_funcion INT, IN p_cantidad_entradas INT,
-    IN p_asientos_codigos VARCHAR(255), OUT p_codigo_error INT, OUT p_mensaje VARCHAR(100)
+    IN p_id_usuario INT,
+    IN p_id_funcion INT,
+    IN p_cantidad_entradas INT,
+    IN p_asientos_codigos VARCHAR(255)
 )
 BEGIN
-    DECLARE v_asientos_libres INT; DECLARE v_precio_entrada DECIMAL(10,2);
-    DECLARE v_subtotal DECIMAL(10,2); DECLARE v_id_venta INT;
-    DECLARE v_asiento_individual VARCHAR(5); DECLARE v_posicion INT DEFAULT 1;
+    DECLARE v_asientos_libres INT;
+    DECLARE v_precio_entrada DECIMAL(10,2);
+    DECLARE v_subtotal DECIMAL(10,2);
+    DECLARE v_id_venta INT;
+    DECLARE v_asiento_individual VARCHAR(5);
+    DECLARE v_posicion INT DEFAULT 1;
     
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
     BEGIN
-        ROLLBACK; SET p_codigo_error = 2; SET p_mensaje = 'Error interno en BD.';
+        ROLLBACK;
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Error interno en el servidor de base de datos.';
     END;
 
     START TRANSACTION;
-    SELECT asientos_disponibles, precio_entrada INTO v_asientos_libres, v_precio_entrada
-    FROM funcion WHERE id_funcion = p_id_funcion FOR UPDATE;
+    
+    SELECT asientos_disponibles, precio_entrada 
+    INTO v_asientos_libres, v_precio_entrada
+    FROM funcion 
+    WHERE id_funcion = p_id_funcion FOR UPDATE;
     
     IF v_asientos_libres < p_cantidad_entradas THEN
-        SET p_codigo_error = 1; SET p_mensaje = 'Capacidad insuficiente.'; ROLLBACK;
+        ROLLBACK;
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Capacidad insuficiente para la función seleccionada.';
     ELSE
         SET v_subtotal = v_precio_entrada * p_cantidad_entradas;
-        INSERT INTO venta_cabecera (id_usuario, total_pagado) VALUES (p_id_usuario, v_subtotal);
+        
+        INSERT INTO venta_cabecera (id_usuario, total_pagado) 
+        VALUES (p_id_usuario, v_subtotal);
+        
         SET v_id_venta = LAST_INSERT_ID();
-        INSERT INTO venta_detalle (id_venta, id_funcion, amount_tickets, subtotal)
+        
+        INSERT INTO venta_detalle (id_venta, id_funcion, cantidad_entradas, subtotal)
         VALUES (v_id_venta, p_id_funcion, p_cantidad_entradas, v_subtotal);
         
-        UPDATE funcion SET asientos_disponibles = asientos_disponibles - p_cantidad_entradas
+        UPDATE funcion 
+        SET asientos_disponibles = asientos_disponibles - p_cantidad_entradas
         WHERE id_funcion = p_id_funcion;
         
         WHILE CHAR_LENGTH(p_asientos_codigos) > 0 AND v_posicion > 0 DO
@@ -308,13 +321,15 @@ BEGIN
                 SET v_asiento_individual = SUBSTRING(p_asientos_codigos, 1, v_posicion - 1);
                 SET p_asientos_codigos = SUBSTRING(p_asientos_codigos, v_posicion + 1);
             ELSE
-                SET v_asiento_individual = p_asientos_codigos; SET p_asientos_codigos = '';
+                SET v_asiento_individual = p_asientos_codigos; 
+                SET p_asientos_codigos = '';
             END IF;
+            
             INSERT INTO asiento_ocupado (id_funcion, id_venta, codigo_asiento)
             VALUES (p_id_funcion, v_id_venta, TRIM(v_asiento_individual));
         END WHILE;
         
-        COMMIT; SET p_codigo_error = 0; SET p_mensaje = 'Venta registrada con éxito.';
+        COMMIT;
     END IF;
 END $$
 DELIMITER ;

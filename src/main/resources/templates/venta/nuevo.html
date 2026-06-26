@@ -1,71 +1,146 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <title>CineMax - Taquilla (Ventas)</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" />
-    <link rel="stylesheet" th:href="@{/css/cinemax.css}">
-</head>
-<body>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="layout :: layoutBase(~{::contenido})">
 
-<div class="cm-container" style="max-width: 1100px;">
-
-	<div class="cm-topbar">
-	    <div>
-	        <div class="cm-brand">🎬 CINE<span class="accent">MAX</span></div>
-	        <div style="font-size: 0.85rem; color: var(--cm-cream-dim); margin-top: 4px;">
-	            Bienvenido, <span style="color: var(--cm-gold-bright); font-weight: 600;" th:text="${session.fullName}"></span> 
-	            (<span th:text="${session.rol}"></span>)
-	        </div>
-	    </div>
-	    <div class="cm-flex-between cm-gap-sm" style="width: auto;">
-	        <a th:href="@{/dashboard}" class="cm-btn cm-btn-ghost"><i class="fas fa-home"></i> Inicio</a>
-	        <button id="btnCerrarSesion" class="cm-btn cm-btn-red"><i class="fas fa-sign-out-alt"></i> Salir</button>
-	    </div>
-	</div>
-    <div class="cm-ticket">
+<div th:fragment="contenido">
+    <div class="cm-ticket" style="max-width: 820px; margin: 0 auto;">
         <h2 class="cm-mt-0" style="border-bottom: 1px solid var(--cm-line); padding-bottom: 16px; margin-bottom: 24px;">
             <i class="fas fa-ticket-alt" style="font-size: 0.8em;"></i> Taquilla — Registro de Venta
         </h2>
 
-        <div th:if="${mensajeExito}" class="cm-alert cm-alert-success" th:text="${mensajeExito}"></div>
-        <div th:if="${mensajeError}" class="cm-alert cm-alert-error" th:text="${mensajeError}"></div>
-
-        <form th:action="@{/cine/venta/guardar}" method="post">
-
-			<div class="cm-field">
-			                <label class="cm-label" for="idFuncion">1. Seleccione la Función</label>
-			                <select name="idFuncion" id="idFuncion" class="cm-select" required>
-			                    <option value="" data-precio="0">-- Seleccione una función en cartelera --</option>
-			                    
-			                    <option th:each="f : ${funciones}"
-			                            th:value="${f.idFuncion}"
-			                            th:data-precio="${f.precioEntrada}"
-			                            th:text="|${f.pelicula.titulo} (Sala ${f.sala.numeroSala}) - ${f.horaInicio} - Asientos Libres: ${f.asientosDisponibles} (S/. ${f.precioEntrada})|">
-			                    </option>
-			                </select>
-			            </div>
+        <form th:action="@{/cine/venta/guardar}" method="post" id="formVenta">
 
             <div class="cm-field">
-                <label class="cm-label" for="cantidad">Cantidad de Entradas</label>
-                <input type="number" name="cantidad" id="cantidad" class="cm-input" required min="1" max="10" placeholder="Ej: 2">
+                <label class="cm-label" for="idPelicula">1. Seleccione la Película</label>
+                <select id="idPelicula" class="cm-select" required>
+                    <option value="">-- Seleccione una Película --</option>
+                    <option th:each="p : ${peliculas}"
+                            th:value="${p.idPelicula}"
+                            th:text="${p.titulo}">
+                    </option>
+                </select>
             </div>
 
             <div class="cm-field">
-                <label class="cm-label" for="asientos">Códigos de Asientos (separados por coma)</label>
-                <input type="text" name="asientos" id="asientos" class="cm-input" required placeholder="Ej: A1,A2,B5">
+                <label class="cm-label" for="idFuncion">2. Seleccione la Función</label>
+                <select name="idFuncion" id="idFuncion" class="cm-select" required disabled>
+                    <option value="" data-precio="0">-- Seleccione una película primero --</option>
+                </select>
+            </div>
+
+            <div class="cm-flex-between cm-gap-sm" style="align-items: flex-start;">
+                <div class="cm-field" style="flex: 1;">
+                    <label class="cm-label" for="cantidad">3. Cantidad de Entradas</label>
+                    <input type="number" name="cantidad" id="cantidad" class="cm-input" required min="1" max="10" placeholder="Ej: 2" disabled>
+                </div>
+
+                <div class="cm-field" style="flex: 1;">
+                    <label class="cm-label">4. Total a Cobrar</label>
+                    <div style="background: var(--cm-charcoal); border: 1px solid var(--cm-gold); border-radius: var(--cm-radius-sm); padding: 10px 14px; color: var(--cm-gold-bright); font-size: 1.4rem; font-family: var(--cm-display); text-align: right;">
+                        S/. <span id="lblTotal">0.00</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="cm-field">
+                <label class="cm-label" for="asientos">5. Códigos de Asientos</label>
+                <input type="text" name="asientos" id="asientos" class="cm-input" required placeholder="Ej: A1,A2" disabled>
                 <div class="cm-info-panel">
-                    <i class="fas fa-info-circle"></i> Asegúrese de ingresar tantos códigos de asiento como entradas solicitadas.
+                    <i class="fas fa-info-circle"></i> Escriba los asientos separados por comas. Deben coincidir con la cantidad ingresada.
                 </div>
             </div>
 
             <div class="cm-flex-between" style="margin-top: 30px;">
-                <a th:href="@{/cine/peliculas}" class="cm-btn cm-btn-ghost">Volver a Cartelera</a>
-                <button type="submit" class="cm-btn cm-btn-gold cm-btn-lg"><i class="fas fa-check"></i> Procesar Venta</button>
+                <a th:href="@{/cine/peliculas}" class="cm-btn cm-btn-ghost">Cancelar</a>
+                <button type="button" id="btnProcesar" class="cm-btn cm-btn-gold cm-btn-lg" disabled><i class="fas fa-check"></i> Emitir Boleto</button>
             </div>
         </form>
     </div>
-</div>
 
-</body>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const selectPelicula = document.getElementById("idPelicula");
+            const selectFuncion = document.getElementById("idFuncion");
+            const inputCantidad = document.getElementById("cantidad");
+            const inputAsientos = document.getElementById("asientos");
+            const lblTotal = document.getElementById("lblTotal");
+            const btnProcesar = document.getElementById("btnProcesar");
+            const formVenta = document.getElementById("formVenta");
+
+            function calcularTotal() {
+                const opcionSeleccionada = selectFuncion.options[selectFuncion.selectedIndex];
+                const precio = opcionSeleccionada ? parseFloat(opcionSeleccionada.getAttribute("data-precio")) || 0 : 0;
+                const cantidad = parseInt(inputCantidad.value) || 0;
+                lblTotal.textContent = (precio * cantidad).toFixed(2);
+            }
+
+            selectPelicula.addEventListener("change", function() {
+                const peliculaId = this.value;
+                
+                selectFuncion.innerHTML = '<option value="" data-precio="0">-- Cargando funciones... --</option>';
+                selectFuncion.disabled = true;
+                inputCantidad.disabled = true;
+                inputAsientos.disabled = true;
+                btnProcesar.disabled = true;
+                inputCantidad.value = '';
+                inputAsientos.value = '';
+                calcularTotal();
+
+                if (peliculaId) {
+                    fetch('/cine/venta/funciones-por-pelicula?idPelicula=' + peliculaId)
+                        .then(response => response.json())
+                        .then(data => {
+                            selectFuncion.innerHTML = '<option value="" data-precio="0">-- Seleccione una función --</option>';
+                            
+                            if (data.length > 0) {
+                                data.forEach(f => {
+                                    const option = document.createElement("option");
+                                    option.value = f.idFuncion;
+                                    option.setAttribute("data-precio", f.precio);
+                                    option.textContent = f.texto;
+                                    selectFuncion.appendChild(option);
+                                });
+                                selectFuncion.disabled = false;
+                            } else {
+                                selectFuncion.innerHTML = '<option value="" data-precio="0">-- No hay funciones programadas --</option>';
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error al cargar funciones:', error);
+                            selectFuncion.innerHTML = '<option value="" data-precio="0">-- Error al cargar --</option>';
+                        });
+                } else {
+                    selectFuncion.innerHTML = '<option value="" data-precio="0">-- Seleccione una película primero --</option>';
+                }
+            });
+
+            selectFuncion.addEventListener("change", function() {
+                const tieneFuncion = this.value !== "";
+                inputCantidad.disabled = !tieneFuncion;
+                inputAsientos.disabled = !tieneFuncion;
+                btnProcesar.disabled = !tieneFuncion;
+                calcularTotal();
+            });
+
+            inputCantidad.addEventListener("input", calcularTotal);
+
+            btnProcesar.addEventListener("click", function() {
+                const cantidad = parseInt(inputCantidad.value) || 0;
+                const asientosTexto = inputAsientos.value.trim();
+                
+                if (cantidad <= 0 || selectFuncion.value === "") {
+                    Swal.fire('Atención', 'Debe seleccionar una función y una cantidad válida.', 'warning');
+                    return;
+                }
+
+                const arrayAsientos = asientosTexto.split(",").filter(a => a.trim() !== "");
+                if (arrayAsientos.length !== cantidad) {
+                    Swal.fire('Error en Asientos', `Ha solicitado ${cantidad} entradas, pero ingresó ${arrayAsientos.length} asientos.`, 'error');
+                    return;
+                }
+
+                formVenta.submit();
+            });
+        });
+    </script>
+</div>
 </html>

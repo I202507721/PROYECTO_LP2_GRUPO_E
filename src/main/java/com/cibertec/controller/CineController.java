@@ -1,5 +1,10 @@
 package com.cibertec.controller;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import com.cibertec.model.Funcion;
 import com.cibertec.model.Pelicula;
 import com.cibertec.repository.FuncionRepository;
@@ -89,20 +94,39 @@ public class CineController {
         }
     }
 
-    // ==========================================
+ // ==========================================
     // 2. PROCESO TRANSACCIONAL: VENTAS (CU06)
     // ==========================================
 
     @GetMapping("/venta/nuevo")
     public String formularioVenta(Model model, HttpSession session, RedirectAttributes flash) {
-        // Validamos que nadie entre a taquilla copiando y pegando la URL sin loguearse
         if (session.getAttribute("idUsuario") == null) {
             flash.addFlashAttribute("alert", Alert.sweetAlertInfo("Debe iniciar sesión para acceder a la Taquilla"));
             return "redirect:/";
         }
         
-        model.addAttribute("funciones", funcionRepository.findByFechaGreaterThanEqual(LocalDate.now()));
+        // AHORA MANDAMOS LA LISTA DE PELÍCULAS AL PRIMER COMBO
+        model.addAttribute("peliculas", peliculaRepository.findByEstado(true));
         return "venta/nuevo";
+    }
+
+    @GetMapping("/venta/funciones-por-pelicula")
+    @ResponseBody
+    public List<Map<String, Object>> obtenerFunciones(@RequestParam("idPelicula") Integer idPelicula) {
+        List<Funcion> funciones = funcionRepository.findActivasByPelicula(idPelicula);
+        List<Map<String, Object>> response = new ArrayList<>();
+        
+        for (Funcion f : funciones) {
+            Map<String, Object> map = new HashMap<>();
+            map.put("idFuncion", f.getIdFuncion());
+            map.put("precio", f.getPrecioEntrada());
+            
+            String texto = "Sala " + f.getSala().getNumeroSala() + " - " + f.getFecha() + " a las " + f.getHoraInicio() + 
+                           " (S/. " + f.getPrecioEntrada() + ") - Libres: " + f.getAsientosDisponibles();
+            map.put("texto", texto);
+            response.add(map);
+        }
+        return response;
     }
 
     @PostMapping("/venta/guardar")
@@ -114,7 +138,6 @@ public class CineController {
             HttpSession session,
             RedirectAttributes flash) {
 
-        // Capturamos el ID real del usuario desde la sesión activa
         Integer idUsuarioTaquillero = (Integer) session.getAttribute("idUsuario");
         
         if (idUsuarioTaquillero == null) {
@@ -124,18 +147,16 @@ public class CineController {
 
         try {
             funcionRepository.registrarVentaCompleta(idUsuarioTaquillero, idFuncion, cantidad, asientos);
-            
-            // Enviamos el mensaje de éxito y redirigimos para limpiar el formulario
             flash.addFlashAttribute("alert", Alert.sweetAlertSuccess("¡Venta transaccional procesada con éxito!"));
             return "redirect:/cine/venta/nuevo";
             
         } catch (Exception e) {
             log.error("Fallo crítico en el SP de venta: {}", e.getMessage());
-            model.addAttribute("alert", Alert.sweetAlertError("Error en taquilla: Capacidad insuficiente o formato de asientos inválido."));
+            model.addAttribute("alert", Alert.sweetAlertError("Error en taquilla: Capacidad insuficiente o código de asientos inválido."));
         }
 
-        // Si hay error, recargamos la lista en la misma vista
-        model.addAttribute("funciones", funcionRepository.findByFechaGreaterThanEqual(LocalDate.now()));
+        // Si hay error, recargamos la lista de películas para que vuelva a intentar
+        model.addAttribute("peliculas", peliculaRepository.findByEstado(true));
         return "venta/nuevo";
     }
 }
