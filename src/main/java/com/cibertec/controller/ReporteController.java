@@ -1,5 +1,6 @@
 package com.cibertec.controller;
 
+import com.cibertec.dto.ReporteFiltroDTO;
 import com.cibertec.repository.FuncionRepository;
 import com.cibertec.repository.ReporteRepository;
 import com.cibertec.service.ReporteJasperService;
@@ -8,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
@@ -25,45 +27,51 @@ import java.util.Map;
 public class ReporteController {
 
 	private final ReporteRepository reporteRepository;
-    private final ReporteJasperService reporteJasperService;
-    private final FuncionRepository funcionRepository;
+	private final ReporteJasperService reporteJasperService;
+	private final FuncionRepository funcionRepository;
 
-    // ==========================================
-    // REPORTE: OCUPACIÓN DE SALAS (CU09 - HTML)
-    // ==========================================
-    @GetMapping("/reporte/ocupacion")
-    public String reporteOcupacion(Model model) {
-        log.info("CU09: Generando reporte de ocupación de salas del día.");
-        model.addAttribute("ocupaciones", reporteRepository.obtenerOcupacionSalas());
-        return "reporte/ocupacion";
-    }
- // NUEVO ENDPOINT: Detalle de ventas por función seleccionada
-    @GetMapping("/reporte/funcion-ventas")
-    public String verVentasPorFuncion(@RequestParam("idFuncion") Integer idFuncion, Model model) {
-        log.info("Cargando detalle de boletas de la función ID: {}", idFuncion);
-        
-        // Obtenemos los datos de la función (Película, Sala, Horario) de forma segura
-        var funcion = funcionRepository.findById(idFuncion).orElseThrow();
-        
-        model.addAttribute("funcion", funcion);
-        model.addAttribute("ventas", reporteRepository.obtenerVentasPorFuncion(idFuncion));
-        return "reporte/ventas_funcion";
-    }
+	// ==========================================
+	// REPORTE: OCUPACIÓN DE SALAS (CU09 - HTML)
+	// ==========================================
+	@GetMapping("/reporte/ocupacion")
+	public String reporteOcupacion(@ModelAttribute ReporteFiltroDTO filter, Model model) {
+		log.info("CU09: Generando reporte de ocupación de salas con filtros aplicados.");
 
-    // Impresión de Ticket PDF con Jaspersoft
-    @GetMapping("/reporte/ticket")
-    public void imprimirTicket(@RequestParam("idVenta") Integer idVenta, jakarta.servlet.http.HttpServletResponse response) throws Exception {
-        String reportPath = "/reporte/ticket_venta.jrxml";
-        java.util.Map<String, Object> params = new java.util.HashMap<>();
-        params.put("p_id_venta", idVenta);
-        
-        net.sf.jasperreports.engine.JasperPrint jasperPrint = reporteJasperService.getJasperPrint(params, reportPath);
-        response.setContentType("application/pdf");
-        response.setHeader("Content-Disposition", String.format("inline; filename=Ticket-Venta-%s.pdf", idVenta));
+		model.addAttribute("ocupaciones", reporteRepository.obtenerOcupacionSalas(filter));
 
-        java.io.OutputStream outputStream = response.getOutputStream();
-        net.sf.jasperreports.engine.JasperExportManager.exportReportToPdfStream(jasperPrint, outputStream);
-        outputStream.flush();
-        outputStream.close();
-    }
+
+		model.addAttribute("filter", filter);
+		return "reporte/ocupacion";
+	}
+
+	//ENDPOINT: Detalle de ventas por función seleccionada
+	@GetMapping("/reporte/funcion-ventas")
+	public String verVentasPorFuncion(@RequestParam("idFuncion") Integer idFuncion, Model model) {
+		log.info("Cargando detalle de boletas de la función ID: {}", idFuncion);
+
+		// Obtenemos los datos de la función (Película, Sala, Horario) de forma segura
+		var funcion = funcionRepository.findById(idFuncion).orElseThrow();
+
+		model.addAttribute("funcion", funcion);
+		model.addAttribute("ventas", reporteRepository.obtenerVentasPorFuncion(idFuncion));
+		return "reporte/ventas_funcion";
+	}
+
+	// Impresión de Ticket PDF con Jaspersoft
+	@GetMapping("/reporte/ticket")
+	public void imprimirTicket(@RequestParam("idVenta") Integer idVenta,
+			jakarta.servlet.http.HttpServletResponse response) throws Exception {
+		String reportPath = "/reporte/ticket_venta.jrxml";
+		java.util.Map<String, Object> params = new java.util.HashMap<>();
+		params.put("p_id_venta", idVenta);
+
+		net.sf.jasperreports.engine.JasperPrint jasperPrint = reporteJasperService.getJasperPrint(params, reportPath);
+		response.setContentType("application/pdf");
+		response.setHeader("Content-Disposition", String.format("inline; filename=Ticket-Venta-%s.pdf", idVenta));
+
+		java.io.OutputStream outputStream = response.getOutputStream();
+		net.sf.jasperreports.engine.JasperExportManager.exportReportToPdfStream(jasperPrint, outputStream);
+		outputStream.flush();
+		outputStream.close();
+	}
 }

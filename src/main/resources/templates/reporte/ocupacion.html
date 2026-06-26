@@ -2,34 +2,83 @@
 <html xmlns:th="http://www.thymeleaf.org" th:replace="layout :: layoutBase(~{::contenido})">
 
 <div th:fragment="contenido">
-    <h2 class="cm-mt-0" style="margin-bottom: 20px;">Reporte de Ocupación de Salas (Hoy)</h2>
+    <div class="cm-flex-between" style="margin-bottom: 20px;">
+        <h2 class="cm-mt-0" style="margin: 0;">Reporte de Ocupación de Salas</h2>
+    </div>
 
-    <div class="cm-table-wrap">
+    <div class="cm-card" style="padding: 18px 20px; margin-bottom: 24px;">
+        <fieldset style="border: 1px solid var(--cm-gold); padding: 15px 20px 20px 20px; border-radius: var(--cm-radius-sm); margin: 0;">
+            <legend style="color: var(--cm-gold-bright); font-family: var(--cm-display); font-size: 1.1rem; padding: 0 10px; width: auto; float: none;">
+                <i class="fas fa-filter"></i> Filtros de Búsqueda
+            </legend>
+            
+            <form th:action="@{/cine/reporte/ocupacion}" method="get" th:object="${filter}">
+                <div class="cm-flex-between cm-gap-sm" style="align-items: flex-end;">
+                    
+                    <div class="cm-field" style="flex: 2; margin-bottom: 0;">
+                        <label class="cm-label">Título de Película</label>
+                        <input type="text" class="cm-input" th:field="*{tituloPelicula}" placeholder="Ej: Sci-Fi Odyssey">
+                    </div>
+                    
+                    <div class="cm-field" style="flex: 1; margin-bottom: 0;">
+                        <label class="cm-label">Fecha Desde</label>
+                        <input type="date" class="cm-input" th:field="*{fechaInicio}">
+                    </div>
+                    
+                    <div class="cm-field" style="flex: 1; margin-bottom: 0;">
+                        <label class="cm-label">Fecha Hasta</label>
+                        <input type="date" class="cm-input" th:field="*{fechaFin}">
+                    </div>
+                    
+                    <div style="display: flex; gap: 10px; margin-bottom: 0;">
+                        <button type="submit" class="cm-btn cm-btn-gold">
+                            <i class="fas fa-search"></i> Buscar
+                        </button>
+                        <a th:href="@{/cine/reporte/ocupacion}" class="cm-btn cm-btn-ghost">
+                            <i class="fas fa-broom"></i> Limpiar
+                        </a>
+                    </div>
+                </div>
+            </form>
+        </fieldset>
+    </div>
+
+    <div class="cm-table-wrap" style="overflow: auto;">
         <table class="cm-table">
             <thead>
                 <tr>
-                    <th>ID Función</th>
+                    <th style="text-align: center;">ID Función</th>
                     <th>Película</th>
+                    <th>Fecha de Función</th>
+                    <th>Hora</th>
                     <th>Sala</th>
-                    <th>Capacidad</th>
-                    <th>Vendidos</th>
-                    <th>Disponibles</th>
+                    <th style="text-align: center;">Capacidad</th>
+                    <th style="text-align: center;">Vendidos</th>
+                    <th style="text-align: center;">Disponibles</th>
                     <th>% Ocupación</th>
-                    <th style="text-align: center;">Acciones</th> </tr>
+                    <th style="text-align: center;">Acciones</th>
+                </tr>
             </thead>
             <tbody>
                 <tr th:if="${#lists.isEmpty(ocupaciones)}">
-                    <td colspan="8" style="text-align: center; color: var(--cm-cream-dim); padding: 30px;">
-                        No hay funciones programadas para el día de hoy.
+                    <td colspan="10" style="text-align: center; color: var(--cm-cream-dim); padding: 30px;">
+                        No se encontraron funciones con los filtros aplicados.
                     </td>
                 </tr>
                 <tr th:each="o : ${ocupaciones}">
-                    <td th:text="${o.idFuncion}">1</td>
+                    <td style="font-size: 0.85rem; color: var(--cm-cream-dim); text-align: center;">
+                        <span th:text="|N° ${o.idFuncion}|"></span>
+                    </td>
                     <td style="font-weight: 600; color: var(--cm-cream);" th:text="${o.pelicula}">Película</td>
+                    
+                    <td th:text="${#temporals.format(o.fecha, 'dd/MM/yyyy')}"></td>
+                    
+                    <td th:text="${o.horaInicio}"></td>
+                    
                     <td th:text="'Sala ' + ${o.numeroSala}">Sala 1</td>
-                    <td th:text="${o.capacidadTotal}">100</td>
-                    <td th:text="${o.asientosVendidos}">0</td>
-                    <td th:text="${o.asientosDisponibles}">100</td>
+                    <td th:text="${o.capacidadTotal}" class="text-center">100</td>
+                    <td th:text="${o.asientosVendidos}" class="text-center" style="color: var(--cm-gold-bright); font-weight: 600;">0</td>
+                    <td th:text="${o.asientosDisponibles}" class="text-center">100</td>
                     <td style="min-width: 160px;">
                         <div style="display:flex; align-items:center; gap:8px;">
                             <div style="flex:1; background: rgba(255,255,255,0.08); border-radius: 6px; height: 10px; overflow:hidden;">
