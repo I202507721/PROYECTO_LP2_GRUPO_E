@@ -8,6 +8,7 @@ import java.util.Map;
 import com.cibertec.model.Funcion;
 import com.cibertec.model.Pelicula;
 import com.cibertec.repository.FuncionRepository;
+import com.cibertec.repository.GeneroRepository;
 import com.cibertec.repository.PeliculaRepository;
 import com.cibertec.repository.SalaRepository;
 import com.cibertec.util.Alert;
@@ -32,12 +33,20 @@ public class CineController {
 	private final PeliculaRepository peliculaRepository;
     private final FuncionRepository funcionRepository;
     private final SalaRepository salaRepository;
+    private final GeneroRepository generoRepository;
+    
     // ==========================================
-    // 1. MANTENIMIENTO: PELÍCULAS (CU01)
+    // 1. MANTENIMIENTO: PELÍCULAS (Solo ADMIN) (CU01)
     // ==========================================
 
     @GetMapping("/peliculas")
-    public String listarPeliculas(@RequestParam(name = "txtGenero", required = false) String genero, Model model) {
+    public String listarPeliculas(@RequestParam(name = "txtGenero", required = false) String genero, Model model, HttpSession session, RedirectAttributes flash) {
+        // CONTROL DE ACCESO: Si no es Administrador, lo patea al dashboard
+        if (!"Administrador".equals(session.getAttribute("rol"))) {
+            flash.addFlashAttribute("alert", Alert.sweetAlertError("Acceso denegado. Solo administradores."));
+            return "redirect:/dashboard";
+        }
+
         if (genero != null && !genero.trim().isEmpty()) {
             model.addAttribute("peliculas", peliculaRepository.filtrarPorGenero(genero));
             model.addAttribute("generoBuscado", genero);
@@ -49,10 +58,16 @@ public class CineController {
 
     //Enviamos la lista de las 12 salas a la vista
     @GetMapping("/pelicula/nuevo")
-    public String formularioPelicula(Model model) {
-        log.info("CU01: Cargando formulario de registro con listado de salas.");
+    public String formularioPelicula(Model model, HttpSession session, RedirectAttributes flash) {
+        // CONTROL DE ACCESO
+        if (!"Administrador".equals(session.getAttribute("rol"))) {
+            flash.addFlashAttribute("alert", Alert.sweetAlertError("Acceso denegado."));
+            return "redirect:/dashboard";
+        }
+
         model.addAttribute("pelicula", new Pelicula());
-        model.addAttribute("salas", salaRepository.findAll());
+        model.addAttribute("salas", salaRepository.findAll()); 
+        model.addAttribute("generos", generoRepository.findAll()); // PASAMOS LOS GÉNEROS AL HTML
         return "pelicula/nuevo";
     }
 
@@ -62,34 +77,40 @@ public class CineController {
             @ModelAttribute("pelicula") Pelicula pelicula, 
             @RequestParam("idSala") Integer idSala,
             @RequestParam("fechaFuncion") LocalDate fechaFuncion,
-            @RequestParam("horaFuncion") LocalTime horaFuncion, 
+            @RequestParam("horaFuncion") LocalTime horaFuncion,
             Model model, 
             RedirectAttributes flash) {
-        try {
-            log.info("CU01: Iniciando registro de película y automatización de función.");
+        
+        // 1. VALIDACIÓN: Evitar nombres duplicados
+        if (peliculaRepository.existsByTituloIgnoreCase(pelicula.getTitulo())) {
+            model.addAttribute("alert", Alert.sweetAlertError("Error: Ya existe una película con ese título."));
+            model.addAttribute("salas", salaRepository.findAll()); 
+            model.addAttribute("generos", generoRepository.findAll());
+            return "pelicula/nuevo";
+        }
 
+        try {
             pelicula.setEstado(true); 
             Pelicula peliculaRegistrada = peliculaRepository.save(pelicula);
-
+            
             var salaSeleccionada = salaRepository.findById(idSala).orElseThrow();
-   
+            
             Funcion nuevaFuncion = new Funcion();
             nuevaFuncion.setPelicula(peliculaRegistrada);
             nuevaFuncion.setSala(salaSeleccionada);
-            nuevaFuncion.setFecha(fechaFuncion); 
-            nuevaFuncion.setHoraInicio(horaFuncion); 
+            nuevaFuncion.setFecha(fechaFuncion);
+            nuevaFuncion.setHoraInicio(horaFuncion);
             nuevaFuncion.setPrecioEntrada(salaSeleccionada.getPrecioBase());
             nuevaFuncion.setAsientosDisponibles(salaSeleccionada.getCapacidad());
             
             funcionRepository.save(nuevaFuncion); 
             
-            flash.addFlashAttribute("alert", Alert.sweetAlertSuccess(
-                "Película registrada. Función programada para el " + fechaFuncion + " a las " + horaFuncion));
+            flash.addFlashAttribute("alert", Alert.sweetAlertSuccess("Película y Función registradas correctamente."));
             return "redirect:/cine/peliculas";
         } catch (Exception e) {
-            log.error("Error en el flujo combinado de registro: {}", e.getMessage());
             model.addAttribute("salas", salaRepository.findAll()); 
-            model.addAttribute("alert", Alert.sweetAlertError("No se pudo procesar el registro. Verifique los campos."));
+            model.addAttribute("generos", generoRepository.findAll());
+            model.addAttribute("alert", Alert.sweetAlertError("Error al procesar el registro."));
             return "pelicula/nuevo";
         }
     }

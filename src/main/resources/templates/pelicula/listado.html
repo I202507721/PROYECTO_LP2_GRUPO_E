@@ -37,7 +37,7 @@
                 <tr th:each="p : ${peliculas}">
                     <td th:text="${p.idPelicula}">1</td>
                     <td style="font-weight: 600; color: var(--cm-cream);" th:text="${p.titulo}">Película</td>
-                    <td th:text="${p.genero}">Género</td>
+                    <td th:text="${p.genero.descripcion}">Género</td>
                     <td th:text="${p.duracion} + ' min'">0 min</td>
                     <td>
                         <span class="cm-badge cm-badge-gold" th:text="${p.clasificacion}">PG-13</span>

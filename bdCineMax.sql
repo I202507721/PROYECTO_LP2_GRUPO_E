@@ -56,32 +56,58 @@ INSERT INTO `usuario` VALUES
 UNLOCK TABLES;
 
 -- ==========================================
--- 3. ESTRUCTURA Y DATOS: pelicula
+-- 3. ESTRUCTURA Y DATOS: genero
+-- ==========================================
+DROP TABLE IF EXISTS `genero`;
+CREATE TABLE `genero` (
+  `id_genero` int NOT NULL AUTO_INCREMENT,
+  `descripcion` varchar(50) NOT NULL,
+  PRIMARY KEY (`id_genero`),
+  UNIQUE KEY `uk_genero_descripcion` (`descripcion`)
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+LOCK TABLES `genero` WRITE;
+/*!40000 ALTER TABLE `genero` DISABLE KEYS */;
+INSERT INTO `genero` VALUES 
+(1,'Acción'),
+(4,'Animación'),
+(2,'Ciencia Ficción'),
+(6,'Comedia'),
+(5,'Drama / Historia'),
+(3,'Suspenso');
+/*!40000 ALTER TABLE `genero` ENABLE KEYS */;
+UNLOCK TABLES;
+
+-- ==========================================
+-- 4. ESTRUCTURA Y DATOS: pelicula
 -- ==========================================
 DROP TABLE IF EXISTS `pelicula`;
 CREATE TABLE `pelicula` (
   `id_pelicula` int NOT NULL AUTO_INCREMENT,
   `titulo` varchar(100) NOT NULL,
-  `genero` varchar(50) NOT NULL,
+  `id_genero` int NOT NULL,
   `duracion` int NOT NULL,
   `clasificacion` varchar(10) NOT NULL,
   `estado` bit(1) DEFAULT b'1',
-  PRIMARY KEY (`id_pelicula`)
+  PRIMARY KEY (`id_pelicula`),
+  UNIQUE KEY `uk_pelicula_titulo` (`titulo`),
+  KEY `fk_pelicula_genero` (`id_genero`),
+  CONSTRAINT `fk_pelicula_genero` FOREIGN KEY (`id_genero`) REFERENCES `genero` (`id_genero`)
 ) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 LOCK TABLES `pelicula` WRITE;
 /*!40000 ALTER TABLE `pelicula` DISABLE KEYS */;
 INSERT INTO `pelicula` VALUES 
-(1,'Sci-Fi Odyssey 2026','Ciencia Ficción',145,'PG-13',_binary ''),
-(2,'Misterio en el Altiplano','Suspenso',118,'Mayores 14',_binary ''),
-(3,'Aventuras Animadas: El Regreso','Animación',95,'Apta Todos',_binary ''),
-(4,'Crónicas del Pasado','Drama / Historia',160,'Mayores 18',_binary ''),
-(5,'Película Antigua Retirada','Comedia',90,'Apta Todos',_binary '\0');
+(1,'Sci-Fi Odyssey 2026',2,145,'PG-13',_binary ''),
+(2,'Misterio en el Altiplano',3,118,'Mayores 14',_binary ''),
+(3,'Aventuras Animadas: El Regreso',4,95,'Apta Todos',_binary ''),
+(4,'Crónicas del Pasado',5,160,'Mayores 18',_binary ''),
+(5,'Película Antigua Retirada',6,90,'Apta Todos',_binary '\0');
 /*!40000 ALTER TABLE `pelicula` ENABLE KEYS */;
 UNLOCK TABLES;
 
 -- ==========================================
--- 4. ESTRUCTURA Y DATOS: sala (Las 12 Salas)
+-- 5. ESTRUCTURA Y DATOS: sala
 -- ==========================================
 DROP TABLE IF EXISTS `sala`;
 CREATE TABLE `sala` (
@@ -113,7 +139,7 @@ INSERT INTO `sala` VALUES
 UNLOCK TABLES;
 
 -- ==========================================
--- 5. ESTRUCTURA Y DATOS: funcion
+-- 6. ESTRUCTURA Y DATOS: funcion
 -- ==========================================
 DROP TABLE IF EXISTS `funcion`;
 CREATE TABLE `funcion` (
@@ -143,7 +169,7 @@ INSERT INTO `funcion` VALUES
 UNLOCK TABLES;
 
 -- ==========================================
--- 6. ESTRUCTURA Y DATOS: venta_cabecera
+-- 7. ESTRUCTURA Y DATOS: venta_cabecera
 -- ==========================================
 DROP TABLE IF EXISTS `venta_cabecera`;
 CREATE TABLE `venta_cabecera` (
@@ -163,7 +189,7 @@ INSERT INTO `venta_cabecera` VALUES (1,2,CURRENT_TIMESTAMP,25.00),(2,3,CURRENT_T
 UNLOCK TABLES;
 
 -- ==========================================
--- 7. ESTRUCTURA Y DATOS: venta_detalle (Columna Integrada)
+-- 8. ESTRUCTURA Y DATOS: venta_detalle
 -- ==========================================
 DROP TABLE IF EXISTS `venta_detalle`;
 CREATE TABLE `venta_detalle` (
@@ -186,7 +212,7 @@ INSERT INTO `venta_detalle` VALUES (1,1,1,2,25.00),(2,2,3,1,21.90);
 UNLOCK TABLES;
 
 -- ==========================================
--- 8. ESTRUCTURA Y DATOS: asiento_ocupado
+-- 9. ESTRUCTURA Y DATOS: asiento_ocupado
 -- ==========================================
 DROP TABLE IF EXISTS `asiento_ocupado`;
 CREATE TABLE `asiento_ocupado` (
@@ -208,7 +234,7 @@ INSERT INTO `asiento_ocupado` VALUES (1,1,1,'A1'),(2,1,1,'A2'),(3,3,2,'P5');
 UNLOCK TABLES;
 
 -- ==========================================
--- VISTAS (VIEWS) — OPTIMIZADAS CON LA NUEVA COLUMNA
+-- VISTAS (VIEWS)
 -- ==========================================
 DROP VIEW IF EXISTS `v_header_venta`;
 CREATE VIEW `v_header_venta` AS 
@@ -257,11 +283,12 @@ DROP PROCEDURE IF EXISTS `sp_consultar_cartelera_disponible`$$
 CREATE PROCEDURE `sp_consultar_cartelera_disponible`()
 BEGIN
     SELECT 
-        f.id_funcion, p.titulo AS pelicula, p.genero, p.clasificacion,
+        f.id_funcion, p.titulo AS pelicula, g.descripcion AS genero, p.clasificacion,
         s.numero_sala, s.tipo_proyeccion, f.fecha, f.hora_inicio,
         f.precio_entrada, f.asientos_disponibles
     FROM funcion f
     INNER JOIN pelicula p ON f.id_pelicula = p.id_pelicula
+    INNER JOIN genero g ON p.id_genero = g.id_genero
     INNER JOIN sala s ON f.id_sala = s.id_sala
     WHERE p.estado = 1 AND f.fecha >= CURDATE()
     ORDER BY f.fecha ASC, f.hora_inicio ASC;
@@ -338,8 +365,11 @@ DELIMITER $$
 DROP PROCEDURE IF EXISTS `sp_filtrar_pelicula_por_genero`$$
 CREATE PROCEDURE `sp_filtrar_pelicula_por_genero`(IN p_genero VARCHAR(50))
 BEGIN
-    SELECT id_pelicula, titulo, genero, duracion, clasificacion, estado
-    FROM pelicula WHERE genero LIKE CONCAT('%', p_genero, '%') ORDER BY titulo ASC;
+    SELECT p.id_pelicula, p.titulo, g.descripcion as genero, p.duracion, p.clasificacion, p.estado
+    FROM pelicula p
+    INNER JOIN genero g ON p.id_genero = g.id_genero
+    WHERE g.descripcion LIKE CONCAT('%', p_genero, '%') 
+    ORDER BY p.titulo ASC;
 END $$
 DELIMITER ;
 

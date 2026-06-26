@@ -20,8 +20,9 @@ public class Pelicula {
     @Column(nullable = false, length = 100)
     private String titulo;
 
-    @Column(nullable = false, length = 50)
-    private String genero;
+    @ManyToOne
+    @JoinColumn(name = "id_genero")
+    private Genero genero;
 
     @Column(nullable = false)
     private Integer duracion;

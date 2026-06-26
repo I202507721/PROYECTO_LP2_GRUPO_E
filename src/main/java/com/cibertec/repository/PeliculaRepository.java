@@ -14,4 +14,6 @@ public interface PeliculaRepository extends JpaRepository<Pelicula, Integer> {
     
     @Query(value = "CALL sp_filtrar_pelicula_por_genero(:p_genero)", nativeQuery = true)
     List<Pelicula> filtrarPorGenero(@Param("p_genero") String genero);
+
+    boolean existsByTituloIgnoreCase(String titulo);
 }

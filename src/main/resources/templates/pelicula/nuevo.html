@@ -24,10 +24,16 @@
                 <input type="text" id="titulo" class="cm-input" th:field="*{titulo}" required placeholder="Ej: Sci-Fi Odyssey 2026">
             </div>
 
-            <div class="cm-field">
-                <label class="cm-label" for="genero">Género</label>
-                <input type="text" id="genero" class="cm-input" th:field="*{genero}" required placeholder="Ej: Ciencia Ficción">
-            </div>
+			<div class="cm-field">
+			                <label class="cm-label" for="genero">Género</label>
+			                <select id="genero" class="cm-select" th:field="*{genero}" required>
+			                    <option value="">-- Seleccione un Género --</option>
+			                    <option th:each="g : ${generos}" 
+			                            th:value="${g.idGenero}" 
+			                            th:text="${g.descripcion}">
+			                    </option>
+			                </select>
+			 </div>
 
             <div class="cm-flex-between cm-gap-sm">
                 <div class="cm-field" style="flex: 1;">
