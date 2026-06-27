@@ -33,6 +33,14 @@ public class LoginController {
             return "login";
         }
         
+     // Validación del estado activo (Si no está activo...)
+        if (!usuario.getActivo()) {
+            var mensaje = Alert.sweetAlertError("Su cuenta se encuentra inactiva. Contacte al administrador.");
+            model.addAttribute("alert", mensaje);
+            model.addAttribute("filter", filter);
+            return "login";
+        }
+        
         // Guardamos los datos del usuario en la sesión del servidor HTTP
         session.setAttribute("idUsuario", usuario.getIdUsuario());
         session.setAttribute("fullName", usuario.getNombre());
