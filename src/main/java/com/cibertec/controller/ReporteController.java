@@ -66,7 +66,7 @@ public class ReporteController {
         java.util.Map<String, Object> params = new java.util.HashMap<>();
         
         //Debe coincidir con Jaspersoft
-        params.put("pNumBoleta", idVenta); 
+        params.put("p_id_venta", idVenta); 
 
         net.sf.jasperreports.engine.JasperPrint jasperPrint = reporteJasperService.getJasperPrint(params, reportPath);
         response.setContentType("application/pdf");
